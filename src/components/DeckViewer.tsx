@@ -20,44 +20,61 @@ const useStyles = makeStyles(() => ({
     height: '100vh',
     zIndex: 1300,
     display: 'flex',
-    flexDirection: 'column',
+    alignItems: 'center',
     justifyContent: 'center',
-    background: 'radial-gradient(ellipse at center, rgba(20, 12, 4, 0.82) 0%, rgba(0, 0, 0, 0.94) 100%)',
+    background:
+      'radial-gradient(ellipse at center, rgba(20, 12, 4, 0.82) 0%, rgba(0, 0, 0, 0.94) 100%)',
     backdropFilter: 'blur(4px)',
     animation: '$fadeIn 180ms ease-out',
+  },
+  // Half the screen, centred
+  panel: {
+    width: '50vw',
+    height: '50vh',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    padding: '2vh 0',
+    boxSizing: 'border-box',
+    background:
+      'linear-gradient(to bottom, rgba(45, 27, 10, 0.96) 0%, rgba(15, 9, 4, 0.97) 100%)',
+    border: '0.15vw solid #E29700',
+    borderRadius: '1.2vw',
+    boxShadow: '0 2vh 6vh rgba(0, 0, 0, 0.8)',
+    overflow: 'hidden',
   },
   header: {
     display: 'flex',
     alignItems: 'center',
-    gap: '1.2vw',
-    padding: '0 4vw 2vh',
+    gap: '0.8vw',
+    padding: '0 2vw 1vh',
     color: '#ffffff',
   },
   avatar: {
-    width: '4vw',
-    height: '4vw',
-    borderRadius: '0.8vw',
+    width: '2.6vw',
+    height: '2.6vw',
+    borderRadius: '0.6vw',
     objectFit: 'cover',
     border: '0.2vw solid #E29700',
   },
   name: {
     fontFamily: 'font1',
-    fontSize: '2vw',
+    fontSize: '1.4vw',
     lineHeight: 1.1,
   },
   stats: {
-    fontSize: '1vw',
+    fontSize: '0.8vw',
     color: '#E2C48A',
   },
   close: {
     marginLeft: 'auto',
-    width: '3vw',
-    height: '3vw',
+    width: '2.2vw',
+    height: '2.2vw',
     borderRadius: '50%',
     border: '0.15vw solid #E29700',
     background: 'rgba(0, 0, 0, 0.5)',
     color: '#ffffff',
-    fontSize: '1.6vw',
+    fontSize: '1.2vw',
     lineHeight: 1,
     cursor: 'pointer',
     '&:hover': { background: '#993300' },
@@ -65,28 +82,29 @@ const useStyles = makeStyles(() => ({
   row: {
     display: 'flex',
     alignItems: 'center',
-    gap: '1.5vw',
-    padding: '4vh 4vw',
+    gap: '1vw',
+    padding: '2vh 2vw',
     overflowX: 'auto',
     overflowY: 'hidden',
     scrollSnapType: 'x proximity',
     scrollBehavior: 'smooth',
     // Cards fade out at the edges, so it's clear the row goes on
-    maskImage: 'linear-gradient(to right, transparent 0, #000 4vw, #000 calc(100% - 4vw), transparent 100%)',
+    maskImage:
+      'linear-gradient(to right, transparent 0, #000 2vw, #000 calc(100% - 2vw), transparent 100%)',
     WebkitMaskImage:
-      'linear-gradient(to right, transparent 0, #000 4vw, #000 calc(100% - 4vw), transparent 100%)',
+      'linear-gradient(to right, transparent 0, #000 2vw, #000 calc(100% - 2vw), transparent 100%)',
     scrollbarColor: '#E29700 transparent',
   },
   card: {
     flex: '0 0 auto',
-    height: '68vh',
-    borderRadius: '1.2vw',
+    height: '30vh',
+    borderRadius: '0.8vw',
     boxShadow: '0 1vh 3vh rgba(0, 0, 0, 0.8)',
     scrollSnapAlign: 'center',
     transition: 'transform 160ms ease-out, box-shadow 160ms ease-out',
     animation: '$dealIn 260ms ease-out backwards',
     '&:hover': {
-      transform: 'translateY(-3vh) scale(1.06)',
+      transform: 'translateY(-1.5vh) scale(1.06)',
       boxShadow: '0 2vh 5vh rgba(226, 151, 0, 0.45)',
     },
   },
@@ -94,7 +112,7 @@ const useStyles = makeStyles(() => ({
     color: '#E2C48A',
     fontSize: '1.4vw',
     textAlign: 'center',
-    padding: '20vh 0',
+    padding: '8vh 0',
   },
   hint: {
     color: 'rgba(255, 255, 255, 0.45)',
@@ -118,8 +136,10 @@ export default function DeckViewer({ player, onClose }: DeckViewerProps) {
     const onKey = (e: KeyboardEvent) => {
       const row = rowRef.current;
       if (e.key === 'Escape') onClose();
-      else if (row && e.key === 'ArrowRight') row.scrollLeft += row.clientWidth / 3;
-      else if (row && e.key === 'ArrowLeft') row.scrollLeft -= row.clientWidth / 3;
+      else if (row && e.key === 'ArrowRight')
+        row.scrollLeft += row.clientWidth / 3;
+      else if (row && e.key === 'ArrowLeft')
+        row.scrollLeft -= row.clientWidth / 3;
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -139,35 +159,53 @@ export default function DeckViewer({ player, onClose }: DeckViewerProps) {
       aria-label={`${player.name}'s kingdom`}
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className={classes.header}>
-        <img src={player.avatar} className={classes.avatar} alt="" />
-        <div>
-          <Typography className={classes.name}>{player.name}'s kingdom</Typography>
-          <Typography className={classes.stats}>
-            {cards.length} {cards.length === 1 ? 'card' : 'cards'} · {player.points} points
-          </Typography>
+      <div className={classes.panel}>
+        <div className={classes.header}>
+          <img src={player.avatar} className={classes.avatar} alt="" />
+          <div>
+            <Typography className={classes.name}>
+              {player.name}'s kingdom
+            </Typography>
+            <Typography className={classes.stats}>
+              {cards.length} {cards.length === 1 ? 'card' : 'cards'} ·{' '}
+              {player.points} points
+            </Typography>
+          </div>
+          <button
+            className={classes.close}
+            onClick={onClose}
+            aria-label="Close"
+          >
+            ×
+          </button>
         </div>
-        <button className={classes.close} onClick={onClose} aria-label="Close">
-          ×
-        </button>
-      </div>
 
-      {cards.length === 0 ? (
-        <Typography className={classes.empty}>No cards yet</Typography>
-      ) : (
-        <div className={classes.row} ref={rowRef} onWheel={onWheel} onClick={(e) => e.target === e.currentTarget && onClose()}>
-          {cards.map((card, index) => (
-            <img
-              key={`${card._id ?? card.picture}-${index}`}
-              src={card.picture}
-              alt=""
-              className={classes.card}
-              style={{ animationDelay: `${Math.min(index, 12) * 35}ms` }}
-            />
-          ))}
-        </div>
-      )}
-      {cards.length > 0 && <Typography className={classes.hint}>Newest first · scroll or use ← → · Esc to close</Typography>}
+        {cards.length === 0 ? (
+          <Typography className={classes.empty}>No cards yet</Typography>
+        ) : (
+          <div
+            className={classes.row}
+            ref={rowRef}
+            onWheel={onWheel}
+            onClick={(e) => e.target === e.currentTarget && onClose()}
+          >
+            {cards.map((card, index) => (
+              <img
+                key={`${card._id ?? card.picture}-${index}`}
+                src={card.picture}
+                alt=""
+                className={classes.card}
+                style={{ animationDelay: `${Math.min(index, 12) * 35}ms` }}
+              />
+            ))}
+          </div>
+        )}
+        {cards.length > 0 && (
+          <Typography className={classes.hint}>
+            Newest first · scroll or use ← → · Esc to close
+          </Typography>
+        )}
+      </div>
     </div>
   );
 
