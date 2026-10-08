@@ -17,8 +17,7 @@ import PlayerCard from 'components/PlayerCard';
 import CardOverViewModal from 'components/CardOverViewModal';
 import DiceButton from 'components/DiceButton';
 import sharedStyle from 'components/sharedSettings';
-import { animated } from '@react-spring/web';
-import useAnimatedCard from 'hooks/useAnimateCards';
+import { FlyingCard, useCardDecks } from 'hooks/useAnimateCards';
 import GameInfo from 'model/GameInfo';
 import fetchCards from 'api/gameApi';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -401,7 +400,7 @@ export default function PlayGame() {
     }
   }, [state.dices.length]);
 
-  const [decks, card] = useAnimatedCard(state.animCardParams, dispatch);
+  const decks = useCardDecks();
 
   const changeVolume = (value) => {
     audioRef.current.volume = value;
@@ -444,12 +443,6 @@ export default function PlayGame() {
       window.removeEventListener('touchstart', startMusic);
     };
   }, []);
-
-  let rotation = state.animCardParams.fromDeck === 'citySlots' ? -90 : 0;
-  let flyingCardStyle =
-    state.animCardParams.fromDeck === 'citySlots'
-      ? { ...styles.flyingCardCity }
-      : {};
 
   // true when it's NOT this player's turn
   const isMyTurn =
@@ -1302,39 +1295,13 @@ export default function PlayGame() {
                 </Grid>
               </Grid>
             </Grid>
-            {state.animationActive && (
-              <animated.div
-                style={{
-                  ...styles.flyingCard,
-                  ...flyingCardStyle,
-                  ...{
-                    left: card.x.interpolate({
-                      range: [0, 1],
-                      output: [card.fromLeft, card.toLeft],
-                    }),
-                    top: card.x.interpolate({
-                      range: [0, 1],
-                      output: [card.fromTop, card.toTop],
-                    }),
-                    opacity: card.x.interpolate({
-                      range: [0, 1],
-                      output: [1, 1],
-                    }),
-                    rotateZ: card.x.interpolate({
-                      range: [0, 1],
-                      output: [0, rotation],
-                    }),
-                  },
-                }}
-              >
-                {state.animCardParams.picture !== undefined && (
-                  <img
-                    src={state.animCardParams.picture}
-                    className={classes.cardDeckImg}
-                  ></img>
-                )}
-              </animated.div>
-            )}
+            <FlyingCard
+              params={state.animCardParams}
+              decks={decks}
+              style={styles.flyingCard}
+              cityStyle={styles.flyingCardCity}
+              imgClassName={classes.cardDeckImg}
+            />
           </Grid>
         </div>
       )}

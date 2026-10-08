@@ -11,7 +11,6 @@ const initalGameState: GameState = {
   cityCardSlots: [],
   citizenCardSlots: [],
   endTurnEnabled: true,
-  animationActive: false,
   isDragonPopUp: false,
   gameInfo: {
     citizenCards: [],

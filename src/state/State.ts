@@ -61,7 +61,6 @@ export interface GameState {
   dragonSlotIndex?: number,
   isDragonPopUp: boolean;
   dragonIndex?: number;
-  animationActive: boolean;
   endTurnEnabled: boolean;
   animCardParams: AnimCardParams;
 }

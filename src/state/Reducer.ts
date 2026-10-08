@@ -73,12 +73,6 @@ const reducer = (state: GameState, action: any): GameState => {
         },
       };
 
-    case 'setAnimationActive':
-      return {
-        ...state,
-        animationActive: action.payload,
-      };
-
     case 'setup':
       // CITIZEN DECK SETUP //
 

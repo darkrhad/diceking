@@ -232,6 +232,44 @@ test('a game played to the end shows the same result on every screen', async ({ 
   await expect(bob.page.getByText(/The penalty pile is empty/)).toHaveText(result);
 });
 
+// The flights a page shows over a few seconds: [picture, frames in the air]
+const recordFlights = (player: Player, ms: number) =>
+  player.page.evaluate(async (ms) => {
+    const flights: [string, number][] = [];
+    let last = null;
+    const t0 = performance.now();
+    while (performance.now() - t0 < ms) {
+      await new Promise((r) => requestAnimationFrame(r));
+      const card = document.querySelector('[data-flying-card]');
+      const picture = card?.querySelector('img')?.getAttribute('src') ?? null;
+      if (picture && picture === last) flights[flights.length - 1][1]++;
+      else if (picture) flights.push([picture, 1]);
+      last = picture;
+    }
+    return flights;
+  }, ms);
+
+test('a guest sees every card flight the host makes', async ({ browser }) => {
+  const alice = await open(browser, 'Alice');
+  const bob = await open(browser, 'Bob');
+  const roomId = await createLobby(alice);
+  await joinLobby(bob, roomId);
+  await expectLobbyPlayers(alice, ['Alice', 'Bob']);
+  await alice.page.getByRole('button', { name: 'Play (Multiplayer)' }).click();
+  for (const p of [alice, bob]) await expect(rollButton(p)).toBeVisible({ timeout: 60_000 });
+
+  // Ending the turn without a card: discard, penalty, the slots sliding, a new card
+  const hostFlights = recordFlights(alice, 4500);
+  const guestFlights = recordFlights(bob, 4500);
+  await endTurnButton(alice).click();
+  const [host, guest] = await Promise.all([hostFlights, guestFlights]);
+
+  expect(host.length).toBeGreaterThanOrEqual(3);
+  expect(guest.map(([picture]) => picture)).toEqual(host.map(([picture]) => picture));
+  // Each one really animated, not skipped
+  for (const [, frames] of [...host, ...guest]) expect(frames).toBeGreaterThan(5);
+});
+
 test('guest going back to the menu is removed everywhere and its docs are deleted', async ({ browser }) => {
   const { alice, bob, carol, roomId } = await lobbyOfThree(browser);
 

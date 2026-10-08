@@ -10,9 +10,10 @@ export interface SyncMessage {
   payload: { seq: number; move: number; state: Partial<GameState> };
 }
 
-// Fields every screen keeps for itself: the card data (each one loads it),
-// whether its flying card is showing, and its own dragon popup.
-const LOCAL_FIELDS: (keyof GameState)[] = ['gameInfo', 'animationActive', 'isDragonPopUp'];
+// Fields every screen keeps for itself: the card data (each one loads it)
+// and its own dragon popup. Card flights are in animCardParams, which guests
+// play on their own screen.
+const LOCAL_FIELDS: (keyof GameState)[] = ['gameInfo', 'isDragonPopUp'];
 
 export function sharedState(state: GameState): Partial<GameState> {
   const shared = { ...state };
