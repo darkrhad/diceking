@@ -1316,7 +1316,6 @@ export default function PlayGame() {
               isGameOver={state.isGameOver === true}
               myPlayerId={isMultiplayer ? playerInfo.playerId : undefined}
               decks={decks}
-              soundOn={isSoundOn}
             />
             {state.cardEffect && (
               <CardEffects effect={state.cardEffect} decks={decks} soundOn={isSoundOn} />

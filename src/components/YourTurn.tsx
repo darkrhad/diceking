@@ -2,7 +2,6 @@ import { makeStyles } from '@material-ui/core';
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { AnimCardDecks } from 'hooks/useAnimateCards';
-import { playYourTurn } from 'sounds/yourTurn';
 import { Player } from 'state/State';
 
 const useStyles = makeStyles(() => ({
@@ -56,13 +55,12 @@ interface YourTurnProps {
   turnNumber: number;
   isGameOver: boolean;
   // This screen's player in a multiplayer game; undefined on a single screen,
-  // where every turn gets the horn and the avatar pulse but no banner
+  // where every turn gets the avatar pulse but no banner
   myPlayerId?: string;
   decks: AnimCardDecks;
-  soundOn: boolean;
 }
 
-// Announces a new turn: a banner sweeping across, a horn, the player's avatar
+// Announces a new turn: a banner sweeping across, the player's avatar
 // pulsing, and in multiplayer the tab title flashing while the tab is hidden
 export default function YourTurn({
   players,
@@ -71,7 +69,6 @@ export default function YourTurn({
   isGameOver,
   myPlayerId,
   decks,
-  soundOn,
 }: YourTurnProps) {
   const classes = useStyles();
   const [banner, setBanner] = useState<{ key: number; text: string } | null>(
@@ -79,8 +76,8 @@ export default function YourTurn({
   );
   const lastTurnRef = useRef<number | null>(null);
   // Read when the banner is due, as the game can end on the same move
-  const latest = useRef({ isGameOver, soundOn });
-  latest.current = { isGameOver, soundOn };
+  const latest = useRef({ isGameOver });
+  latest.current = { isGameOver };
 
   useEffect(() => {
     if (players.length === 0) return;
@@ -102,7 +99,6 @@ export default function YourTurn({
       if (myPlayerId !== undefined) {
         setBanner({ key: turnNumber, text: 'Your turn!' });
       }
-      if (latest.current.soundOn) playYourTurn(0.4);
 
       const avatar =
         decks.kingdomSmall[playerTurn]?.current?.parentElement?.querySelector(
