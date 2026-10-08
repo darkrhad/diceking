@@ -369,6 +369,36 @@ const presets: Record<CardEffectKind, (c: PresetContext) => void> = {
     shake(pile, '0.5vw', 400);
   },
 
+  // Crazy: the card spins round as it lands, wobbling, with blue sparks
+  gnome: ({ rect, cx, cy, scale, add, pile }) => {
+    add(30, () => {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = between(120, 320) * scale;
+      return {
+        x: cx,
+        y: cy,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        drag: 3,
+        size: between(2, 4) * scale,
+        maxLife: between(0.4, 0.8),
+        color: pick<RGB>([[80, 160, 255], [140, 210, 255], [255, 255, 255]]),
+        twinkle: true,
+      };
+    });
+    pile.animate(
+      [
+        { transform: 'rotate(0deg) scale(1)' },
+        { transform: 'rotate(360deg) scale(1.1)', offset: 0.5 },
+        { transform: 'rotate(354deg) scale(1)', offset: 0.65 },
+        { transform: 'rotate(366deg) scale(1)', offset: 0.8 },
+        { transform: 'rotate(357deg) scale(1)', offset: 0.9 },
+        { transform: 'rotate(360deg) scale(1)' },
+      ],
+      { duration: 700, easing: 'ease-out' }
+    );
+  },
+
   // A heavy landing: green dust puffing out of both sides, the pile squashing
   orc: ({ rect, scale, add, pile }) => {
     add(30, (i) => {

@@ -36,6 +36,25 @@ const sounds: Record<
     );
   },
 
+  // A silly boing: a tone bouncing down in pitch, wobbling fast
+  gnome: (ctx, out, at) => {
+    const osc = ctx.createOscillator();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(180, at);
+    osc.frequency.exponentialRampToValueAtTime(520, at + 0.06);
+    osc.frequency.exponentialRampToValueAtTime(140, at + 0.5);
+    const wobble = ctx.createOscillator();
+    wobble.frequency.value = 18;
+    const depth = ctx.createGain();
+    depth.gain.value = 40;
+    wobble.connect(depth).connect(osc.frequency);
+    osc.connect(envelope(ctx, at, 0.4, 0.55, 0.01)).connect(out);
+    [osc, wobble].forEach((o) => {
+      o.start(at);
+      o.stop(at + 0.6);
+    });
+  },
+
   // A heavy thud: a falling low tone and a dull knock
   orc: (ctx, out, at) => {
     const osc = tone(ctx, out, at, 110, 0.35, 0.7);

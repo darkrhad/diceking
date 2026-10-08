@@ -1,9 +1,10 @@
 import Card from 'model/Card';
 
 // The effect played when a card lands in a player's kingdom. The dragon has
-// its own (DragonFire); Crazy Gnomes have none.
+// its own (DragonFire).
 export type CardEffectKind =
   | 'dwarf'
+  | 'gnome'
   | 'orc'
   | 'snob'
   | 'elf'
@@ -47,6 +48,8 @@ export function citizenEffect(card: Card): CardEffectKind | null {
       return 'dwarf';
     case 'green':
       return 'orc';
+    case 'blue':
+      return 'gnome';
   }
   return null;
 }
