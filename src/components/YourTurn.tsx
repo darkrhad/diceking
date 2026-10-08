@@ -56,7 +56,7 @@ interface YourTurnProps {
   turnNumber: number;
   isGameOver: boolean;
   // This screen's player in a multiplayer game; undefined on a single screen,
-  // where every turn is announced with the player's name
+  // where every turn gets the horn and the avatar pulse but no banner
   myPlayerId?: string;
   decks: AnimCardDecks;
   soundOn: boolean;
@@ -97,11 +97,11 @@ export default function YourTurn({
     // After the end of the last turn has settled
     const timer = setTimeout(() => {
       if (latest.current.isGameOver) return;
-      setBanner({
-        key: turnNumber,
-        text:
-          myPlayerId === undefined ? `${player.name}'s turn!` : 'Your turn!',
-      });
+      // The banner is for multiplayer only; on a single screen the turn
+      // label already says whose turn it is
+      if (myPlayerId !== undefined) {
+        setBanner({ key: turnNumber, text: 'Your turn!' });
+      }
       if (latest.current.soundOn) playYourTurn(0.4);
 
       const avatar =
