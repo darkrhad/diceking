@@ -1,6 +1,6 @@
 # Dice King
 
-## Multiplayer: Firestore cleanup (one-time setup)
+## Multiplayer: Firestore cleanup
 
 Rooms and WebRTC signaling live in Firestore under `rooms/{roomId}`. The host
 deletes its room when it leaves through the UI, but a closed tab can't finish
