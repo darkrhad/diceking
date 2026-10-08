@@ -177,6 +177,7 @@ const reducer = (state: GameState, action: any): GameState => {
         dragonIndex: null,
         discardDeck: [],
         playerTurn: 0,
+        turnNumber: 0,
         highestScorePlayer: null,
         endTurnEnabled: true,
         isGameOver: false,
@@ -246,6 +247,7 @@ const reducer = (state: GameState, action: any): GameState => {
       return {
         ...state,
         playerTurn: action.payload,
+        turnNumber: (state.turnNumber ?? 0) + 1,
       };
 
     case 'savePoints':

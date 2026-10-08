@@ -18,6 +18,7 @@ import CardOverViewModal from 'components/CardOverViewModal';
 import DeckViewer from 'components/DeckViewer';
 import DragonFire from 'components/DragonFire';
 import CardEffects from 'components/CardEffects';
+import YourTurn from 'components/YourTurn';
 import DiceButton from 'components/DiceButton';
 import sharedStyle from 'components/sharedSettings';
 import { FlyingCard, useCardDecks } from 'hooks/useAnimateCards';
@@ -1308,6 +1309,15 @@ export default function PlayGame() {
             {viewedPlayer !== null && state.player[viewedPlayer] && (
               <DeckViewer player={state.player[viewedPlayer]} onClose={() => setViewedPlayer(null)} />
             )}
+            <YourTurn
+              players={state.player}
+              playerTurn={state.playerTurn}
+              turnNumber={state.turnNumber ?? 0}
+              isGameOver={state.isGameOver === true}
+              myPlayerId={isMultiplayer ? playerInfo.playerId : undefined}
+              decks={decks}
+              soundOn={isSoundOn}
+            />
             {state.cardEffect && (
               <CardEffects effect={state.cardEffect} decks={decks} soundOn={isSoundOn} />
             )}

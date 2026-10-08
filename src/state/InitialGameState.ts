@@ -3,6 +3,7 @@ import { DiceColors, GameState } from './State';
 const initalGameState: GameState = {
   player: [],
   playerTurn: 0,
+  turnNumber: 0,
   diceTurns: 3,
   initalDiceRolls: 3,
   dices: [],

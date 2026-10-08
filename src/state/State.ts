@@ -55,6 +55,9 @@ export interface Player {
 export interface GameState {
   player: Player[];
   playerTurn: number;
+  // Goes up every time a turn starts, also when a Sorcerer gives the same
+  // player another one
+  turnNumber: number;
   diceTurns: number;
   initalDiceRolls: number;
   isGameOver?: boolean;
