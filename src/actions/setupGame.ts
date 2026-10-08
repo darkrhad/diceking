@@ -1,6 +1,7 @@
 import delay from 'delay';
 import { PlayersInfo } from 'hooks/usePlayerInfo';
 import { GameState } from 'state/State';
+import { lastSync } from 'state/sync';
 
 export default function setupGame(isMultiplayer: boolean, playerInfo: PlayersInfo) {
   return async (dispatch, getState) => {
@@ -24,6 +25,11 @@ export default function setupGame(isMultiplayer: boolean, playerInfo: PlayersInf
         },
         meta: { remote: true }, // no need to send to others, all got from host
       });
+
+      // The host may have sent newer updates while the board was loading
+      if (lastSync.current) {
+        dispatch({ type: 'loadGameState', payload: lastSync.current.payload.state });
+      }
     }
   };
 }

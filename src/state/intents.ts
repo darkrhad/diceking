@@ -4,6 +4,7 @@ import updateDragon from 'actions/updateDragon';
 import takeCard from 'actions/takeCard';
 import endTurn from 'actions/endTurn';
 import { GameState } from './State';
+import { moveCount, ONCE_INTENTS } from './sync';
 
 // What a player asks the game to do. Guests send these to the host; the host
 // checks them and runs the matching action. The host's own clicks go through
@@ -14,8 +15,6 @@ export type Intent =
   | { type: 'UPDATE_DRAGON'; payload: { slotIndex?: number; dragonIndex?: number } }
   | { type: 'TAKE_CARD'; payload: { index: number } }
   | { type: 'END_TURN'; payload: { hasTakenDragon?: boolean } };
-
-export const INTENT_TYPES = ['ROLL_DICE', 'LOCK_DICE', 'UPDATE_DRAGON', 'TAKE_CARD', 'END_TURN'];
 
 // The state the board last rendered, for checking intents that arrive over
 // the network outside of React.
@@ -116,6 +115,7 @@ export async function runIntent(
     return false;
   }
   busy = true;
+  if (ONCE_INTENTS.includes(intent.type)) moveCount.current += 1;
   try {
     await dispatch(intentAction(intent, isMultiplayer));
   } finally {

@@ -137,6 +137,76 @@ test('guests play their own turns and everyone sees the same board', async ({ br
   }
 });
 
+test('a fast double click on roll uses one roll', async ({ browser }) => {
+  const { alice, everyone } = await startedGame(browser);
+  const bob = everyone[1];
+  await rollButton(alice).click();
+  await endTurnButton(alice).click();
+  await expectTurn(everyone, 'Bob');
+
+  const before = await rollsLeft(bob);
+  await rollButton(bob).dblclick();
+  await bob.page.waitForTimeout(1000);
+  for (const p of everyone) await expect(rollButton(p)).toHaveText(`Roll (${before - 1} Left)`);
+});
+
+test('the host refuses a move made on an old board', async ({ browser }) => {
+  const { alice, everyone } = await startedGame(browser);
+  const bob = everyone[1];
+  await rollButton(alice).click();
+  await endTurnButton(alice).click();
+  await expectTurn(everyone, 'Bob');
+
+  const before = await rollsLeft(bob);
+  await sendRaw(bob, { type: 'ROLL_DICE', payload: {}, baseMove: 0 });
+  await bob.page.waitForTimeout(1000);
+  for (const p of everyone) await expect(rollButton(p)).toHaveText(`Roll (${before} Left)`);
+
+  // The guest's board is still usable afterwards
+  await rollButton(bob).click();
+  for (const p of everyone) await expect(rollButton(p)).toHaveText(`Roll (${before - 1} Left)`);
+});
+
+test('a few rounds with cards taken leave every board the same', async ({ browser }) => {
+  test.setTimeout(180_000);
+  const { everyone } = await startedGame(browser);
+  const names = everyone.map((p) => p.name);
+  const scores = (p: Player) => p.page.getByText(/^\w+: -?\d+$/).allInnerTexts();
+
+  for (let move = 0; move < 6; move++) {
+    const current = everyone[move % 3];
+    const next = everyone[(move + 1) % 3];
+    await expectTurn(everyone, current.name);
+
+    const rolls = await rollsLeft(current);
+    await rollButton(current).click();
+    await rollButton(current).click();
+    // Wait for the host's answer, so the cards that can be taken are current
+    await expect(rollButton(current)).toHaveText(`Roll (${rolls - 2} Left)`);
+    const take = current.page.getByRole('button', { name: 'Take Card' });
+    if ((await take.count()) > 0) {
+      await take.first().click();
+      // A dragon goes to another player first
+      const give = current.page.getByRole('button', { name: 'Give' });
+      if (await give.isVisible().catch(() => false)) {
+        const other = names.find((n) => n !== current.name && n !== 'Alice') ?? next.name;
+        await current.page.locator('button', { hasText: other }).first().click();
+        await give.click();
+      }
+    } else {
+      await endTurnButton(current).click();
+    }
+    // A Sorcerer can give the same player another turn; stop there
+    const passedOn = await expectTurn([current], next.name).then(() => true, () => false);
+    if (!passedOn) break;
+
+    const expected = await scores(everyone[0]);
+    for (const p of everyone.slice(1)) {
+      await expect(p.page.getByText(/^\w+: -?\d+$/)).toHaveText(expected);
+    }
+  }
+});
+
 test('guest going back to the menu is removed everywhere and its docs are deleted', async ({ browser }) => {
   const { alice, bob, carol, roomId } = await lobbyOfThree(browser);
 

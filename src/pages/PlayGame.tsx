@@ -35,6 +35,15 @@ import startGame from 'actions/startGame';
 import setupGame from 'actions/setupGame';
 import { NetworkContext } from 'contexts/FirestoreProvider';
 import { gameStateRef, Intent, runIntent } from 'state/intents';
+import {
+  hostAnswerListeners,
+  lastSync,
+  moveCount,
+  ONCE_INTENTS,
+  sharedState,
+  SyncMessage,
+  syncSeq,
+} from 'state/sync';
 
 const useStyles = makeStyles((theme) => {
   return {
@@ -460,20 +469,52 @@ export default function PlayGame() {
   };
 
   useEffect(() => {
-    if (pendingRef.current) setPendingIntent(false);
-  }, [state]);
+    const answered = () => {
+      if (pendingRef.current) setPendingIntent(false);
+    };
+    hostAnswerListeners.add(answered);
+    return () => {
+      hostAnswerListeners.delete(answered);
+      clearTimeout(pendingTimerRef.current);
+    };
+  }, []);
 
-  useEffect(() => () => clearTimeout(pendingTimerRef.current), []);
+  // Host: sends the board to the guests after it changes, once per batch of
+  // changes and only if something they see changed
+  const syncScheduledRef = useRef(false);
+  const lastSentRef = useRef('');
+  useEffect(() => {
+    if (!isMultiplayer || !playerInfo.isHost || state.player.length === 0) return;
+    if (syncScheduledRef.current) return;
+    syncScheduledRef.current = true;
+    queueMicrotask(() => {
+      syncScheduledRef.current = false;
+      const shared = sharedState(gameStateRef.current);
+      const json = JSON.stringify(shared);
+      if (json === lastSentRef.current) return;
+      lastSentRef.current = json;
+      syncSeq.current += 1;
+      const message: SyncMessage = {
+        type: 'SYNC_STATE',
+        payload: { seq: syncSeq.current, move: moveCount.current, state: shared },
+      };
+      lastSync.current = message;
+      multiplayer.send(message);
+    });
+  }, [state]);
 
   // Host and single player run the move here; guests ask the host
   const act = (intent: Intent) => {
     if (isMultiplayer && !playerInfo.isHost) {
       // Locking dice and picking the dragon's player set a value, so sending
       // them twice is harmless
-      const once = intent.type !== 'LOCK_DICE' && intent.type !== 'UPDATE_DRAGON';
+      const once = ONCE_INTENTS.includes(intent.type);
       if (once) {
         if (pendingRef.current) return;
         setPendingIntent(true);
+        // The host refuses it if another move ran since this board was drawn
+        multiplayer.send({ ...intent, baseMove: moveCount.current });
+        return;
       }
       multiplayer.send(intent);
       return;

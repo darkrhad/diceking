@@ -83,7 +83,9 @@ export function useReducerWithThunk(reducer, initialState, name) {
       }
     }
 
-    if (networkSend && (!action.meta?.remote || action.meta?.remote === undefined) && action.localOnly == undefined) {
+    // The board reaches guests as SYNC_STATE (see PlayGame); only actions
+    // marked for it go out as they are
+    if (networkSend && action.meta?.broadcast) {
       networkSend(action);
     }
 

@@ -14,6 +14,7 @@ import { setupHostPeersWithFirestore } from './../firestore/setupHostPeersWithFi
 
 import { markRoomInactiveOnUnload } from 'firestore/deleteRoom';
 import { runIntent } from 'state/intents';
+import { hostAnswerListeners, lastSync, moveCount, ONCE_INTENTS, syncSeq } from 'state/sync';
 
 export interface NetworkContextType {
   send: (action: any) => void;
@@ -97,7 +98,11 @@ export const NetworkProvider: React.FC<NetworkProviderProps> = ({
   // Handle incoming message (for both host and guest)
   const handleMessage = (msg: { data: string }, senderId?: string) => {
     const data = JSON.parse(msg.data);
-    console.log('[NETWORK] Received message:', data, 'from', senderId);
+    if (data.type === 'SYNC_STATE') {
+      console.log('[NETWORK] Received SYNC_STATE', data.payload?.seq);
+    } else {
+      console.log('[NETWORK] Received message:', data, 'from', senderId);
+    }
 
     if (isHost) {
       // ==================================================================
@@ -151,8 +156,20 @@ export const NetworkProvider: React.FC<NetworkProviderProps> = ({
         case 'END_TURN':
           if (gameDispatchRef.current) {
             // Checked against the host's state: only the current player, only
-            // allowed moves, one at a time (a fast double click sends two)
-            runIntent(gameDispatchRef.current, data, true, senderId);
+            // allowed moves, one at a time, and a roll, take card or end turn
+            // only if no other one ran since the guest's board was drawn (a
+            // fast double click sends two)
+            const stale = ONCE_INTENTS.includes(data.type) && data.baseMove !== moveCount.current;
+            const ran = stale
+              ? Promise.resolve(false)
+              : runIntent(gameDispatchRef.current, data, true, senderId);
+            ran.then((ok) => {
+              if (!ok) {
+                console.log('[NETWORK] Refused', data.type, 'from', senderId);
+                // Nothing changes, so answer with the current board
+                resendSync(senderId);
+              }
+            });
           }
           break;
 
@@ -191,23 +208,26 @@ export const NetworkProvider: React.FC<NetworkProviderProps> = ({
           notifyHostLeft();
         break;
 
-        // 🎲 ALL OTHER IN_GAME ACTIONS
-        default:
-          if (gameDispatchRef.current) {
-            // add meta.remote so the reducer knows this came from the network
-            gameDispatchRef.current({ ...data, meta: { remote: true } });
-          } else {
-            console.warn(
-              '[NETWORK] Received in-game message but game not initialized:',
-              msg
-            );
+        // 🎲 SYNC_STATE: the whole board, after every change on the host
+        case 'SYNC_STATE': {
+          const { seq, state } = data.payload;
+          if (seq > syncSeq.current) {
+            syncSeq.current = seq;
+            moveCount.current = data.payload.move;
+            lastSync.current = data;
+            // Before the board is ready it's applied by setupGame
+            gameDispatchRef.current?.({ type: 'loadGameState', payload: state, meta: { remote: true } });
           }
+          hostAnswerListeners.forEach((listener) => listener());
           break;
+        }
       }
     }
 
     // Update local messages state for UI/debugging if needed
-    setMessages((msgs) => [...msgs, { data, senderId }]);
+    if (data.type !== 'SYNC_STATE') {
+      setMessages((msgs) => [...msgs, { data, senderId }]);
+    }
   };
 
 
@@ -216,6 +236,10 @@ export const NetworkProvider: React.FC<NetworkProviderProps> = ({
 
     let cancelled = false;
     hostLeftHandledRef.current = false;
+    // A new room starts counting updates from 0
+    syncSeq.current = 0;
+    moveCount.current = 0;
+    lastSync.current = null;
 
     if (isHost) {
 
@@ -357,8 +381,18 @@ export const NetworkProvider: React.FC<NetworkProviderProps> = ({
     }
   };
 
+  // Host: sends the last board update to one guest
+  const resendSync = (peerId: string) => {
+    const socket = guestConnectionsRef.current.get(peerId);
+    if (lastSync.current && socket?.readyState === 'open') {
+      socket.send(JSON.stringify({ ...lastSync.current, senderId: playerId }));
+    }
+  };
+
   const send = (action: any) => {
     const message = JSON.stringify({ ...action, senderId: playerId });
+    const logged =
+      action.type === 'SYNC_STATE' ? `SYNC_STATE ${action.payload.seq} (${message.length} bytes)` : message;
 
     if (isHost) {
       // Host broadcasts to all guests
@@ -366,7 +400,7 @@ export const NetworkProvider: React.FC<NetworkProviderProps> = ({
         if (socket.channel.readyState === 'open') {
         console.log(
           '🟩 [Network] Host broadcasts to guest: ',
-          message
+          logged
         );
           socket.send(message);
         }
@@ -376,7 +410,7 @@ export const NetworkProvider: React.FC<NetworkProviderProps> = ({
       if (guestSocketRef.current?.readyState === 'open') {
         console.log(
           '🟩 [Network] Guest sends to host: ',
-          message
+          logged
         );
         guestSocketRef.current.channel.send(message);
       } else {
