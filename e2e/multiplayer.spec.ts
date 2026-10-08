@@ -84,6 +84,59 @@ test('game starts for everyone, dice rolls sync, and late joiners are refused', 
   await expect.poll(() => late.alerts).toEqual(['⚠️ The game has already started.']);
 });
 
+// Starts a game of three and returns who is on turn and who isn't
+const startedGame = async (browser) => {
+  const { alice, bob, carol } = await lobbyOfThree(browser);
+  await alice.page.getByRole('button', { name: 'Play (Multiplayer)' }).click();
+  for (const p of [alice, bob, carol]) await expect(rollButton(p)).toBeVisible({ timeout: 60_000 });
+  const turn = await alice.page.getByText(/'s Turn$/).innerText();
+  const everyone = [alice, bob, carol];
+  const current = everyone.find((p) => turn.startsWith(p.name));
+  return { alice, everyone, current, others: everyone.filter((p) => p !== current) };
+};
+
+const rollsLeft = async (player: Player) =>
+  Number((await rollButton(player).innerText()).match(/\d+/)[0]);
+
+test('the host ignores a roll from a guest whose turn it is not', async ({ browser }) => {
+  const { alice, everyone, others } = await startedGame(browser);
+  const guest = others.find((p) => p !== alice);
+  const before = await rollsLeft(alice);
+
+  await sendRaw(guest, { type: 'ROLL_DICE', payload: {} });
+
+  await alice.page.waitForTimeout(1000);
+  for (const p of everyone) await expect(rollButton(p)).toHaveText(`Roll (${before} Left)`);
+});
+
+const endTurnButton = (player: Player) => player.page.getByRole('button', { name: 'End Turn' });
+
+const expectTurn = async (players: Player[], name: string) => {
+  for (const p of players) await expect(p.page.getByText(/'s Turn$/)).toHaveText(`${name}'s Turn`);
+};
+
+test('guests play their own turns and everyone sees the same board', async ({ browser }) => {
+  const { alice, everyone } = await startedGame(browser);
+  const [, bob, carol] = everyone;
+  await expectTurn(everyone, 'Alice');
+
+  await rollButton(alice).click();
+  await endTurnButton(alice).click();
+  await expectTurn(everyone, 'Bob');
+
+  const before = await rollsLeft(bob);
+  await rollButton(bob).click();
+  for (const p of everyone) await expect(rollButton(p)).toHaveText(`Roll (${before - 1} Left)`);
+  await endTurnButton(bob).click();
+  await expectTurn(everyone, 'Carol');
+
+  // Same scores everywhere
+  const scores = await alice.page.getByText(/^\w+: -?\d+$/).allInnerTexts();
+  for (const p of [bob, carol]) {
+    await expect(p.page.getByText(/^\w+: -?\d+$/)).toHaveText(scores);
+  }
+});
+
 test('guest going back to the menu is removed everywhere and its docs are deleted', async ({ browser }) => {
   const { alice, bob, carol, roomId } = await lobbyOfThree(browser);
 

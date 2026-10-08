@@ -180,6 +180,6 @@ export default function takeCard(index, isMultiplayer: boolean, isHost: boolean)
       });
     });
 
-    dispatch(endTurn(hasTakenDragon, isMultiplayer, isHost, currentSlots, state.dices, state.citizenCardDeck, state.penaltyCardDeck, state.discardDeck, citySlots, state.player, state.playerTurn));
+    await dispatch(endTurn(hasTakenDragon, isMultiplayer, isHost, currentSlots, state.dices, state.citizenCardDeck, state.penaltyCardDeck, state.discardDeck, citySlots, state.player, state.playerTurn));
   };
 }

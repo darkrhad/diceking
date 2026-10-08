@@ -4,3 +4,4 @@ playwright-report/
 *-debug.log
 .DS_Store
 .env*
+build/

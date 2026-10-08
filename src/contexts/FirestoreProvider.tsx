@@ -12,12 +12,8 @@ import { DataChannelSocket } from './../firestore/DataChannelSocket';
 import { setupGuestPeerWithFirestore } from './../firestore/setupGuestPeerWithFirestore';
 import { setupHostPeersWithFirestore } from './../firestore/setupHostPeersWithFirestore';
 
-import takeCard from 'actions/takeCard';
-import endTurn from 'actions/endTurn';
-import rollDice from 'actions/rollDice';
 import { markRoomInactiveOnUnload } from 'firestore/deleteRoom';
-import lockDice from 'actions/diceLock';
-import updateDragon from 'actions/updateDragon';
+import { runIntent } from 'state/intents';
 
 export interface NetworkContextType {
   send: (action: any) => void;
@@ -147,41 +143,21 @@ export const NetworkProvider: React.FC<NetworkProviderProps> = ({
           setGameStarted(true);
           break;
 
-        // 🎲 ROLL_DICE
+        // 🎲 ROLL_DICE, LOCK_DICE, UPDATE_DRAGON, TAKE_CARD, END_TURN
         case 'ROLL_DICE':
+        case 'LOCK_DICE':
+        case 'UPDATE_DRAGON':
+        case 'TAKE_CARD':
+        case 'END_TURN':
           if (gameDispatchRef.current) {
-            gameDispatchRef.current(rollDice(true, isHost));
+            // Checked against the host's state: only the current player, only
+            // allowed moves, one at a time (a fast double click sends two)
+            runIntent(gameDispatchRef.current, data, true, senderId);
           }
           break;
-        
-        case 'LOCK_DICE':
-           if (gameDispatchRef.current) {
-            gameDispatchRef.current(lockDice(true, isHost, data.payload.isLocked, data.payload.index));
-          }
-        break;
-
-        case 'UPDATE_DRAGON':
-             if (gameDispatchRef.current) {
-            gameDispatchRef.current(updateDragon(true, isHost, data.payload?.slotIndex, data.payload?.dragonIndex));
-          } 
-        break;
 
         case 'PLAYER_LEAVE': // player left
           removePlayer(senderId);
-          break;
-
-        // 🎲 TAKE_CARD
-        case 'TAKE_CARD':
-          if (gameDispatchRef.current) {
-            gameDispatchRef.current(takeCard(data.payload.index, true, isHost));
-          }
-          break;
-
-        // 🎲 END_TURN
-        case 'END_TURN':
-          if (gameDispatchRef.current) {
-            gameDispatchRef.current(endTurn(data.payload.index, true, isHost));
-          }
           break;
       }
     } else {

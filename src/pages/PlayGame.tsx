@@ -13,9 +13,6 @@ import { CitizenCardSlot, Dice } from '../state/State';
 import reducer from '../state/Reducer';
 import initalGameState from '../state/InitialGameState';
 import { useReducerWithThunk } from 'utils';
-import rollDice from 'actions/rollDice';
-import takeCard from 'actions/takeCard';
-import endTurn from 'actions/endTurn';
 import PlayerCard from 'components/PlayerCard';
 import CardOverViewModal from 'components/CardOverViewModal';
 import DiceButton from 'components/DiceButton';
@@ -37,8 +34,7 @@ import { useIsMultiplayer } from 'hooks/useIsMultiplayer';
 import startGame from 'actions/startGame';
 import setupGame from 'actions/setupGame';
 import { NetworkContext } from 'contexts/FirestoreProvider';
-import lockDice from 'actions/diceLock';
-import updateDragon from 'actions/updateDragon';
+import { gameStateRef, Intent, runIntent } from 'state/intents';
 
 const useStyles = makeStyles((theme) => {
   return {
@@ -335,6 +331,7 @@ export default function PlayGame() {
     // store dispatch in ref for NetworkProvider to use
     gameDispatchRef.current = dispatch;
   }, [dispatch]);
+  gameStateRef.current = state;
 
   const theme = useTheme();
 
@@ -445,6 +442,44 @@ export default function PlayGame() {
     playerInfo.players[state.playerTurn]?.playerId !== playerInfo.playerId;
 
   const multiplayer = useContext(NetworkContext);
+
+  // Guest: set while a roll, take card or end turn is on its way to the host,
+  // so a second click before the host answers isn't sent too
+  const pendingRef = useRef(false);
+  const pendingTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const [pending, setPending] = useState(false);
+
+  const setPendingIntent = (value: boolean) => {
+    pendingRef.current = value;
+    setPending(value);
+    clearTimeout(pendingTimerRef.current);
+    if (value) {
+      // The host doesn't answer moves it rejects
+      pendingTimerRef.current = setTimeout(() => setPendingIntent(false), 2000);
+    }
+  };
+
+  useEffect(() => {
+    if (pendingRef.current) setPendingIntent(false);
+  }, [state]);
+
+  useEffect(() => () => clearTimeout(pendingTimerRef.current), []);
+
+  // Host and single player run the move here; guests ask the host
+  const act = (intent: Intent) => {
+    if (isMultiplayer && !playerInfo.isHost) {
+      // Locking dice and picking the dragon's player set a value, so sending
+      // them twice is harmless
+      const once = intent.type !== 'LOCK_DICE' && intent.type !== 'UPDATE_DRAGON';
+      if (once) {
+        if (pendingRef.current) return;
+        setPendingIntent(true);
+      }
+      multiplayer.send(intent);
+      return;
+    }
+    runIntent(dispatch, intent, isMultiplayer, isMultiplayer ? playerInfo.playerId : undefined);
+  };
 
   useEffect(() => {
     if (playerInfo.hostLeft) {
@@ -596,7 +631,7 @@ export default function PlayGame() {
                                 marginBottom: '1vw',
                               }}
                               onClick={() => {
-                                dispatch(updateDragon(isMultiplayer, playerInfo.isHost, undefined, index)); //dragon index
+                                act({ type: 'UPDATE_DRAGON', payload: { dragonIndex: index } });
                               }}
                             >
                               <img
@@ -645,13 +680,7 @@ export default function PlayGame() {
                                 })
                               : '';
                             state.dragonIndex !== null
-                              ? dispatch(
-                                  takeCard(
-                                    state.dragonSlotIndex,
-                                    isMultiplayer,
-                                    playerInfo.isHost
-                                  )
-                                )
+                              ? act({ type: 'TAKE_CARD', payload: { index: state.dragonSlotIndex } })
                               : '';
                           }}
                         >
@@ -755,6 +784,7 @@ export default function PlayGame() {
                           <Button
                             disabled={
                               !state.endTurnEnabled ||
+                              pending ||
                               (isMultiplayer && isMyTurn)
                             }
                             style={{
@@ -771,15 +801,9 @@ export default function PlayGame() {
                                     type: 'updateDragonPopUp',
                                     payload: true,
                                   })
-                                : dispatch(
-                                    takeCard(
-                                      index,
-                                      isMultiplayer,
-                                      playerInfo.isHost
-                                    )
-                                  );
+                                : act({ type: 'TAKE_CARD', payload: { index } });
                               value.card.specialEffect === 'Dragon'
-                                ? dispatch(updateDragon(isMultiplayer, playerInfo.isHost, index, undefined)) //slot
+                                ? act({ type: 'UPDATE_DRAGON', payload: { slotIndex: index } })
                                 : '';
                             }}
                           >
@@ -804,7 +828,7 @@ export default function PlayGame() {
                         endTurnEnabled={state.endTurnEnabled}
                         onClick={() => {
                           if (!isMultiplayer || isMyTurn === false) {
-                            dispatch(lockDice(isMultiplayer, playerInfo.isHost, value.isLocked, index))
+                            act({ type: 'LOCK_DICE', payload: { index, isLocked: value.isLocked } });
                           }
                         }}
                       ></DiceButton>
@@ -888,11 +912,12 @@ export default function PlayGame() {
                     disabled={
                       state.diceTurns === 0 ||
                       state.isGameOver === true ||
+                      pending ||
                       (isMultiplayer && isMyTurn)
                     }
                     variant="contained"
                     onClick={() => {
-                      dispatch(rollDice(isMultiplayer, playerInfo.isHost));
+                      act({ type: 'ROLL_DICE' });
                       sound.currentTime > 0
                         ? (sound.currentTime = 0)
                         : sound.play();
@@ -1197,13 +1222,12 @@ export default function PlayGame() {
                       disabled={
                         state.isGameOver === true ||
                         state.endTurnEnabled === false ||
+                        pending ||
                         (isMultiplayer && isMyTurn)
                       }
                       variant="contained"
                       onClick={() =>
-                        dispatch(
-                          endTurn(false, isMultiplayer, playerInfo.isHost)
-                        )
+                        act({ type: 'END_TURN', payload: { hasTakenDragon: false } })
                       }
                     >
                       End Turn
