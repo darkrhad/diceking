@@ -19,6 +19,7 @@ const initalGameState: GameState = {
     dices: [],
   },
   citizenCardDeck: [],
+  dragonFire: { target: 0, points: 0, start: 0 },
   animCardParams: {
     fromDeck: 'citizen',
     toDeck: 'citizen',

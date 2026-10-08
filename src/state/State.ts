@@ -23,6 +23,14 @@ export interface AnimCardParams {
   duration?: number,
 }
 
+// A dragon breathing fire on the player it was given to; every screen plays
+// it when start goes up
+export interface DragonFire {
+  target: number;
+  points: number;
+  start: number;
+}
+
 export enum DiceColors {
   Red = 'R',
   Blue = 'B',
@@ -63,4 +71,5 @@ export interface GameState {
   dragonIndex?: number;
   endTurnEnabled: boolean;
   animCardParams: AnimCardParams;
+  dragonFire: DragonFire;
 }

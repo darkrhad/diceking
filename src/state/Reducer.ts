@@ -38,6 +38,15 @@ const reducer = (state: GameState, action: any): GameState => {
         ...state,
         gameInfo: { ...action.payload },
       };
+    case 'dragonFire':
+      return {
+        ...state,
+        dragonFire: {
+          ...action.payload,
+          start: (state.dragonFire?.start ?? 0) + 1,
+        },
+      };
+
     case 'loadGameState':
       return {
         ...state,

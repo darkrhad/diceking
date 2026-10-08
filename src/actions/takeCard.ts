@@ -53,6 +53,10 @@ export default function takeCard(index, isMultiplayer: boolean, isHost: boolean)
             index: dragonIndex,
           },
         });
+        dispatch({
+          type: 'dragonFire',
+          payload: { target: dragonIndex, points: card.points },
+        });
 
         // otherPlayers[numberRoll].deck.splice(0, 0, card);
       } else {
