@@ -57,7 +57,9 @@ export default function replaceSlots(currentSlots: CitizenCardSlot[], citizenDec
           }
         }
         // Ako nijedna kartica nije prebacena u prazan slot popuni iz citizenDeck-a
-        if (!isReplaced) {
+        // With the citizen pile empty the slot stays empty; the game ends
+        // at the end of this turn
+        if (!isReplaced && citizenDeck.length > 0) {
           dispatch({
             type: 'setAnimCardParams',
             payload: {

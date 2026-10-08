@@ -161,6 +161,7 @@ const reducer = (state: GameState, action: any): GameState => {
         highestScorePlayer: null,
         endTurnEnabled: true,
         isGameOver: false,
+        gameOverReason: undefined,
       };
 
     case 'saveEndTurnEnabled':
@@ -280,6 +281,7 @@ const reducer = (state: GameState, action: any): GameState => {
       return {
         ...state,
         isGameOver: action.payload,
+        gameOverReason: action.reason,
       };
   }
 

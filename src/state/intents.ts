@@ -116,8 +116,12 @@ export async function runIntent(
   }
   busy = true;
   if (ONCE_INTENTS.includes(intent.type)) moveCount.current += 1;
+  const state = gameStateRef.current;
+  console.log('[Game]', state.player[state.playerTurn]?.name + ':', intent.type, intent.payload ?? '');
   try {
     await dispatch(intentAction(intent, isMultiplayer));
+  } catch (err) {
+    console.error('[Game] Move failed:', intent.type, err);
   } finally {
     busy = false;
   }

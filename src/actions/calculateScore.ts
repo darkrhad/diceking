@@ -18,6 +18,9 @@ export default function calculateScore(isHost, isMultiplayer, currentPlayers: Pl
       return n.reduce((points, card) => points + card.points, 0);
     };
 
+    // For a tie: the player with the fewest minus points wins
+    const minusPoints = new Map<Player, number>();
+
     currentPlayers.forEach((player, index) => {
       let negatives = player.deck.filter(
         (card) => card.color === 'penalty' || card.color === 'dragon'
@@ -39,6 +42,7 @@ export default function calculateScore(isHost, isMultiplayer, currentPlayers: Pl
 
       let total = sum(positives) - sum(negatives) + fairySum;
       player.points = total;
+      minusPoints.set(player, sum(negatives));
 
       dispatch({
         type: 'savePoints',
@@ -49,8 +53,10 @@ export default function calculateScore(isHost, isMultiplayer, currentPlayers: Pl
       });
     });
 
-    let sortedPlayers = currentPlayers.sort((a, b) =>
-      a.points < b.points ? 1 : -1
+    // A sorted copy: sorting the players themselves would change whose turn
+    // playerTurn points at
+    let sortedPlayers = [...currentPlayers].sort(
+      (a, b) => b.points - a.points || minusPoints.get(a) - minusPoints.get(b)
     );
     let highestPlayer = sortedPlayers[0];
 

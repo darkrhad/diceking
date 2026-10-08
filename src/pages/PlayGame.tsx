@@ -9,7 +9,7 @@ import {
 import { makeStyles } from '@material-ui/core/styles';
 import { CSSProperties, useContext, useReducer, useRef, useState } from 'react';
 import { useEffect } from 'react';
-import { CitizenCardSlot, Dice } from '../state/State';
+import { CitizenCardSlot, Dice, Player } from '../state/State';
 import reducer from '../state/Reducer';
 import initalGameState from '../state/InitialGameState';
 import { useReducerWithThunk } from 'utils';
@@ -233,6 +233,11 @@ const useStyles = makeStyles((theme) => {
       padding: '0.5vw',
       paddingRight: 0,
     },
+    gameOverDetail: {
+      color: '#ffffff',
+      fontSize: '0.9vw',
+      padding: '0 0.5vw 0.5vw',
+    },
     victoryPoint: {
       color: '#E29700',
       fontWeight: 'bold',
@@ -324,7 +329,7 @@ export default function PlayGame() {
   const [volumeValue, setVolumeValue] = useState(0.3);
   const [isSoundHovered, setIsSoundHovered] = useState(false);
   const initialTrack = Math.floor(Math.random() * playlist.length);
-  const [currentTrack, setCurrentTrack] = useState(initialTrack);
+  const currentTrackRef = useRef(initialTrack);
   const audioRef = useRef<HTMLAudioElement>(new Audio(playlist[initialTrack]));
   const playerInfo = useContext(PlayerInfoContext);
   const [showPopUp, setShowPopUp] = useState(false);
@@ -411,9 +416,8 @@ export default function PlayGame() {
     audio.volume = 0;
 
     const playNextTrack = () => {
-      let nextIndex = (currentTrack + 1) % playlist.length;
-      setCurrentTrack(nextIndex);
-      audio.src = playlist[nextIndex];
+      currentTrackRef.current = (currentTrackRef.current + 1) % playlist.length;
+      audio.src = playlist[currentTrackRef.current];
       audio.play().catch((err) => console.log('Autoplay blocked', err));
     };
 
@@ -439,7 +443,7 @@ export default function PlayGame() {
       window.removeEventListener('keydown', startMusic);
       window.removeEventListener('touchstart', startMusic);
     };
-  }, [currentTrack]);
+  }, []);
 
   let rotation = state.animCardParams.fromDeck === 'citySlots' ? -90 : 0;
   let flyingCardStyle =
@@ -447,8 +451,9 @@ export default function PlayGame() {
       ? { ...styles.flyingCardCity }
       : {};
 
+  // true when it's NOT this player's turn
   const isMyTurn =
-    playerInfo.players[state.playerTurn]?.playerId !== playerInfo.playerId;
+    state.player[state.playerTurn]?.playerId !== playerInfo.playerId;
 
   const multiplayer = useContext(NetworkContext);
 
@@ -536,6 +541,19 @@ export default function PlayGame() {
       dispatch({ type: 'updatePlayers', payload: {players: playerInfo.players}});       
   }, [playerInfo.players]);
 
+  const isWinner = (player: Player) =>
+    !!state.highestScorePlayer &&
+    (player.playerId
+      ? player.playerId === state.highestScorePlayer.playerId
+      : player === state.highestScorePlayer);
+
+  useEffect(() => {
+    if (state.isGameOver) {
+      const scores = state.player.map((p) => `${p.name} ${p.points}`).join(', ');
+      console.log(`[Game] Game over: ${state.gameOverReason}. Scores: ${scores}`);
+    }
+  }, [state.isGameOver]);
+
   const onDialogClose = () => {
     setShowPopUp(false);
     window.location.href = '/';
@@ -614,9 +632,7 @@ export default function PlayGame() {
                           index === state.playerTurn ? true : false
                         }
                         isGameOver={state.isGameOver}
-                        isHighestScorePlayer={
-                          player === state.highestScorePlayer ? true : false
-                        }
+                        isHighestScorePlayer={isWinner(player)}
                         index={index}
                       ></PlayerCard>
                     </Grid>
@@ -911,13 +927,22 @@ export default function PlayGame() {
                       state.isGameOver === true ? 'visible' : 'hidden',
                   }}
                 >
-                  <Typography className={classes.victoryText}>
-                    {state.highestScorePlayer?.name} is king/queen of the dice
-                    with an incredible score of
-                  </Typography>
-                  <Typography className={classes.victoryPoint}>
-                    {state.highestScorePlayer?.points}
-                  </Typography>
+                  <div>
+                    <div style={{ display: 'flex' }}>
+                      <Typography className={classes.victoryText}>
+                        {state.highestScorePlayer?.name} is king/queen of the dice
+                        with an incredible score of
+                      </Typography>
+                      <Typography className={classes.victoryPoint}>
+                        {state.highestScorePlayer?.points}
+                      </Typography>
+                    </div>
+                    <Typography className={classes.gameOverDetail}>
+                      {state.gameOverReason}
+                      {state.gameOverReason ? ' · ' : ''}
+                      {state.player.map((p) => `${p.name}: ${p.points}`).join(', ')}
+                    </Typography>
+                  </div>
                 </div>
                 <Grid key={'tooltip'} item>
                   <Tooltip title="After each roll you may lock as many dices as you like by pressing on the dice. Locked dices won't be rolled on next roll click.">

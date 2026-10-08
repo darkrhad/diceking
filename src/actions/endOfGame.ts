@@ -4,26 +4,22 @@ import { CityCardSlot, GameState } from 'state/State';
 export default function endOfGame(penaltyCardDeck: Card[], citizenCardDeck: Card[], cityCardSlots: CityCardSlot[]) {
   return (dispatch, getState) => {
 
-    let emptyCitySlots = false;
-    let isPenaltyEmpty = penaltyCardDeck.length === 0 ? true : false;
-    let isCitizenEmpty = citizenCardDeck.length === 0 ? true : false;
-    cityCardSlots.forEach((slot) =>
-      slot.cards.length === 0
-        ? (emptyCitySlots = true)
-        : (emptyCitySlots = false)
-    );
+    // The game ends when the citizen pile, the penalty pile or any one of
+    // the village stacks runs out
+    let reason: string | undefined;
+    if (citizenCardDeck.length === 0) {
+      reason = 'The citizen pile is empty';
+    } else if (penaltyCardDeck.length === 0) {
+      reason = 'The penalty pile is empty';
+    } else if (cityCardSlots.some((slot) => slot.cards.length === 0)) {
+      reason = 'A village stack is empty';
+    }
 
-    let anyEmpty =
-      [emptyCitySlots, isPenaltyEmpty, isCitizenEmpty].filter(
-        (isEmpty) => isEmpty === true
-      ).length >= 1
-        ? true
-        : false;
-
-    if (anyEmpty === true) {
+    if (reason) {
       dispatch({
         type: 'endGame',
         payload: true,
+        reason,
       });
     }
   };

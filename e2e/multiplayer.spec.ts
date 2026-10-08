@@ -207,6 +207,31 @@ test('a few rounds with cards taken leave every board the same', async ({ browse
   }
 });
 
+test('a game played to the end shows the same result on every screen', async ({ browser }) => {
+  test.setTimeout(180_000);
+  const alice = await open(browser, 'Alice');
+  const bob = await open(browser, 'Bob');
+  const roomId = await createLobby(alice);
+  await joinLobby(bob, roomId);
+  await expectLobbyPlayers(alice, ['Alice', 'Bob']);
+  await alice.page.getByRole('button', { name: 'Play (Multiplayer)' }).click();
+  for (const p of [alice, bob]) await expect(rollButton(p)).toBeVisible({ timeout: 60_000 });
+
+  // Ending a turn without taking a card takes a penalty card; there are 10
+  for (let turn = 0; turn < 10; turn++) {
+    const current = turn % 2 === 0 ? alice : bob;
+    await expectTurn([alice, bob], current.name);
+    await endTurnButton(current).click();
+  }
+
+  for (const p of [alice, bob]) {
+    await expect(p.page.getByText(/is king\/queen of the dice/)).toBeVisible();
+    await expect(p.page.getByText(/The penalty pile is empty/)).toBeVisible();
+  }
+  const result = await alice.page.getByText(/The penalty pile is empty/).innerText();
+  await expect(bob.page.getByText(/The penalty pile is empty/)).toHaveText(result);
+});
+
 test('guest going back to the menu is removed everywhere and its docs are deleted', async ({ browser }) => {
   const { alice, bob, carol, roomId } = await lobbyOfThree(browser);
 

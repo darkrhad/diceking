@@ -79,7 +79,7 @@ export default function takePenaltyCard(citizenCardDeck: Card[], citizenCardSlot
     });
 
 
-    dispatch(replaceSlots(citizenCardSlots, citizenCardDeck));
+    await dispatch(replaceSlots(citizenCardSlots, citizenCardDeck));
 
     return { citizenCardSlots, discardDeck, penaltyCardDeck}
   };

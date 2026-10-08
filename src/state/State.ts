@@ -49,6 +49,7 @@ export interface GameState {
   diceTurns: number;
   initalDiceRolls: number;
   isGameOver?: boolean;
+  gameOverReason?: string;
   dices: Dice[];
   discardDeck: Card[];
   penaltyCardDeck: Card[];
