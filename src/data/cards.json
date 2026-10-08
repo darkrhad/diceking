@@ -1,0 +1,710 @@
+{
+  "citizenCards": [
+    {
+      "_id": "6105b27bbbb7d819502a85ae",
+      "color": "purple",
+      "points": 0,
+      "picture": "/images/citizenCards/fairy-5.png",
+      "specialEffect": "Fairy",
+      "backPicture": "",
+      "condition": "3R2B"
+    },
+    {
+      "_id": "6105b242bbb7d819502a85ab",
+      "color": "purple",
+      "points": 0,
+      "picture": "/images/citizenCards/fairy-2.png",
+      "specialEffect": "Fairy",
+      "backPicture": "",
+      "condition": "2R2G"
+    },
+    {
+      "_id": "6105af88bbb7d819502a859e",
+      "color": "dragon",
+      "points": 6,
+      "picture": "/images/citizenCards/dragon-3.png",
+      "specialEffect": "Dragon",
+      "backPicture": "",
+      "condition": "gt30"
+    },
+    {
+      "_id": "6105b67fbbb7d819502a85c1",
+      "color": "yellow",
+      "points": 5,
+      "picture": "/images/citizenCards/snob-1.png",
+      "specialEffect": "Snob",
+      "backPicture": "",
+      "condition": "AllOdd"
+    },
+    {
+      "_id": "6105b4cdbbb7d819502a85bc",
+      "color": "green",
+      "points": 2,
+      "picture": "/images/citizenCards/orc-4.png",
+      "specialEffect": "",
+      "backPicture": "",
+      "condition": "3Same"
+    },
+    {
+      "_id": "6105b35cbbb7d819502a85b5",
+      "color": "purple",
+      "points": 1,
+      "picture": "/images/citizenCards/goblin-1.png",
+      "specialEffect": "Mushroom",
+      "backPicture": "",
+      "condition": "4OfSameColor"
+    },
+    {
+      "_id": "6105b2cfbbb7d819502a85b0",
+      "color": "blue",
+      "points": 3,
+      "picture": "/images/citizenCards/gnome-2.png",
+      "specialEffect": "",
+      "backPicture": "",
+      "condition": "5R"
+    },
+    {
+      "_id": "6105b254bbb7d819502a85ac",
+      "color": "purple",
+      "points": 0,
+      "picture": "/images/citizenCards/fairy-3.png",
+      "specialEffect": "Fairy",
+      "backPicture": "",
+      "condition": "2R3G"
+    },
+    {
+      "_id": "6105b06ebbb7d819502a85a0",
+      "color": "brown",
+      "points": 6,
+      "picture": "/images/citizenCards/dwarf-2.png",
+      "specialEffect": "",
+      "backPicture": "",
+      "condition": "4Threes"
+    },
+    {
+      "_id": "6105b4f5bbb7d819502a85bd",
+      "color": "green",
+      "points": 8,
+      "picture": "/images/citizenCards/orc-5.png",
+      "specialEffect": "",
+      "backPicture": "",
+      "condition": "4Same2Same"
+    },
+    {
+      "_id": "6105b3b2bbb7d819502a85b8",
+      "color": "white",
+      "points": 1,
+      "picture": "/images/citizenCards/hypnotist.png",
+      "specialEffect": "Hypnotist",
+      "backPicture": "",
+      "condition": "lt12"
+    },
+    {
+      "_id": "6105afa1bbb7d819502a859f",
+      "color": "brown",
+      "points": 6,
+      "picture": "/images/citizenCards/dwarf-1.png",
+      "specialEffect": "",
+      "backPicture": "",
+      "condition": "4Fours"
+    },
+    {
+      "_id": "6105b32fbbb7d819502a85b4",
+      "color": "blue",
+      "points": 1,
+      "picture": "/images/citizenCards/gnome-6.png",
+      "specialEffect": "",
+      "backPicture": "",
+      "condition": "3G"
+    },
+    {
+      "_id": "6105b2f1bbb7d819502a85b1",
+      "color": "blue",
+      "points": 8,
+      "picture": "/images/citizenCards/gnome-3.png",
+      "specialEffect": "",
+      "backPicture": "",
+      "condition": "6B"
+    },
+    {
+      "_id": "6105b0d9bbb7d819502a85a3",
+      "color": "brown",
+      "points": 4,
+      "picture": "/images/citizenCards/dwarf-5.png",
+      "specialEffect": "",
+      "backPicture": "",
+      "condition": "3Threes"
+    },
+    {
+      "_id": "6105b1f3bbb7d819502a85aa",
+      "color": "purple",
+      "points": 0,
+      "picture": "/images/citizenCards/fairy-1.png",
+      "specialEffect": "Fairy",
+      "backPicture": "",
+      "condition": "2B2G"
+    },
+    {
+      "_id": "6105b0b0bbb7d819502a85a2",
+      "color": "brown",
+      "points": 10,
+      "picture": "/images/citizenCards/dwarf-4.png",
+      "specialEffect": "",
+      "backPicture": "",
+      "condition": "5Ones"
+    },
+    {
+      "_id": "6105b6a2bbb7d819502a85c3",
+      "color": "purple",
+      "points": 2,
+      "picture": "/images/citizenCards/sorcerer-1.png",
+      "specialEffect": "Sorcerer",
+      "backPicture": "",
+      "condition": "2OfEachColor"
+    },
+    {
+      "_id": "6105b3f0bbb7d819502a85b9",
+      "color": "green",
+      "points": 1,
+      "picture": "/images/citizenCards/orc-1.png",
+      "specialEffect": "",
+      "backPicture": "",
+      "condition": "2PairsOf2Same"
+    },
+    {
+      "_id": "6105b305bbb7d819502a85b2",
+      "color": "blue",
+      "points": 2,
+      "picture": "/images/citizenCards/gnome-4.png",
+      "specialEffect": "",
+      "backPicture": "",
+      "condition": "4G"
+    },
+    {
+      "_id": "6105b39bbbb7d819502a85b7",
+      "color": "purple",
+      "points": 7,
+      "picture": "/images/citizenCards/goblin-3.png",
+      "specialEffect": "Mushroom",
+      "backPicture": "",
+      "condition": "6OfSameColor"
+    },
+    {
+      "_id": "6105b621bbb7d819502a85c0",
+      "color": "green",
+      "points": 3,
+      "picture": "/images/citizenCards/orc-7.png",
+      "specialEffect": "",
+      "backPicture": "",
+      "condition": "3Same2Same"
+    },
+    {
+      "_id": "6105af6bbbb7d819502a859d",
+      "color": "dragon",
+      "points": 4,
+      "picture": "/images/citizenCards/dragon-2.png",
+      "specialEffect": "Dragon",
+      "backPicture": "",
+      "condition": "gt28"
+    },
+    {
+      "_id": "6105b13fbbb7d819502a85a5",
+      "color": "brown",
+      "points": 4,
+      "picture": "/images/citizenCards/dwarf-7.png",
+      "specialEffect": "",
+      "backPicture": "",
+      "condition": "3Fours"
+    },
+    {
+      "_id": "6105b083bbb7d819502a85a1",
+      "color": "brown",
+      "points": 10,
+      "picture": "/images/citizenCards/dwarf-3.png",
+      "specialEffect": "",
+      "backPicture": "",
+      "condition": "5Sixes"
+    },
+    {
+      "_id": "6105b384bbb7d819502a85b6",
+      "color": "purple",
+      "points": 2,
+      "picture": "/images/citizenCards/goblin-2.png",
+      "specialEffect": "Mushroom",
+      "backPicture": "",
+      "condition": "5OfSameColor"
+    },
+    {
+      "_id": "6105b266bbb7d819502a85ad",
+      "color": "purple",
+      "points": 0,
+      "picture": "/images/citizenCards/fairy-4.png",
+      "specialEffect": "Fairy",
+      "backPicture": "",
+      "condition": "3B2G"
+    },
+    {
+      "_id": "6105b172bbb7d819502a85a7",
+      "color": "yellow",
+      "points": 1,
+      "picture": "/images/citizenCards/elf-1.png",
+      "specialEffect": "Arrogant",
+      "backPicture": "",
+      "condition": "4InARow"
+    },
+    {
+      "_id": "6105b691bbb7d819502a85c2",
+      "color": "yellow",
+      "points": 5,
+      "picture": "/images/citizenCards/snob-2.png",
+      "specialEffect": "Snob",
+      "backPicture": "",
+      "condition": "AllEven"
+    },
+    {
+      "_id": "6105b1debbb7d819502a85a9",
+      "color": "yellow",
+      "points": 7,
+      "picture": "/images/citizenCards/elf-3.png",
+      "specialEffect": "Arrogant",
+      "backPicture": "",
+      "condition": "6InARow"
+    },
+    {
+      "_id": "6105b46cbbb7d819502a85ba",
+      "color": "green",
+      "points": 7,
+      "picture": "/images/citizenCards/orc-2.png",
+      "specialEffect": "",
+      "backPicture": "",
+      "condition": "3PairsOf2Same"
+    },
+    {
+      "_id": "6105b31fbbb7d819502a85b3",
+      "color": "blue",
+      "points": 2,
+      "picture": "/images/citizenCards/gnome-5.png",
+      "specialEffect": "",
+      "backPicture": "",
+      "condition": "4R"
+    },
+    {
+      "_id": "6105b0ecbbb7d819502a85a4",
+      "color": "brown",
+      "points": 6,
+      "picture": "/images/citizenCards/dwarf-6.png",
+      "specialEffect": "",
+      "backPicture": "",
+      "condition": "4Sixes"
+    },
+    {
+      "_id": "6105b48bbbb7d819502a85bb",
+      "color": "green",
+      "points": 3,
+      "picture": "/images/citizenCards/orc-3.png",
+      "specialEffect": "",
+      "backPicture": "",
+      "condition": "4Same"
+    },
+    {
+      "_id": "6105b1cbbbb7d819502a85a8",
+      "color": "yellow",
+      "points": 3,
+      "picture": "/images/citizenCards/elf-2.png",
+      "specialEffect": "Arrogant",
+      "backPicture": "",
+      "condition": "5InARow"
+    },
+    {
+      "_id": "6105b28dbbb7d819502a85af",
+      "color": "blue",
+      "points": 3,
+      "picture": "/images/citizenCards/gnome-1.png",
+      "specialEffect": "",
+      "backPicture": "",
+      "condition": "5B"
+    },
+    {
+      "_id": "6105b15bbbb7d819502a85a6",
+      "color": "brown",
+      "points": 4,
+      "picture": "/images/citizenCards/dwarf-8.png",
+      "specialEffect": "",
+      "backPicture": "",
+      "condition": "3Ones"
+    },
+    {
+      "_id": "6105b5a7bbb7d819502a85be",
+      "color": "green",
+      "points": 7,
+      "picture": "/images/citizenCards/orc-6.png",
+      "specialEffect": "",
+      "backPicture": "",
+      "condition": "5Same"
+    },
+    {
+      "_id": "60f582367a2b0c47b799d18c",
+      "color": "dragon",
+      "points": 2,
+      "picture": "/images/citizenCards/dragon-1.png",
+      "specialEffect": "Dragon",
+      "backPicture": "",
+      "condition": "gt25"
+    },
+    {
+      "_id": "6105b6f1bbb7d819502a85c4",
+      "color": "purple",
+      "points": 3,
+      "picture": "/images/citizenCards/sorcerer-2.png",
+      "specialEffect": "Sorcerer",
+      "backPicture": "",
+      "condition": "3R3B"
+    }
+  ],
+  "cityCards": [
+    {
+      "_id": "6105ae25bbb7d819502a859a",
+      "color": "blue",
+      "backPicture": "",
+      "picture": "/images/cityCards/cities-4.png",
+      "points": 2
+    },
+    {
+      "_id": "6105acfcbbb7d819502a8592",
+      "color": "purple",
+      "backPicture": "",
+      "picture": "/images/cityCards/cities-15.png",
+      "points": 4
+    },
+    {
+      "_id": "6105ae4fbbb7d819502a859c",
+      "color": "blue",
+      "backPicture": "",
+      "picture": "/images/cityCards/cities-6.png",
+      "points": 4
+    },
+    {
+      "_id": "6105ac78bbb7d819502a858e",
+      "color": "yellow",
+      "backPicture": "",
+      "picture": "/images/cityCards/cities-2.png",
+      "points": 3
+    },
+    {
+      "_id": "6105ad1cbbb7d819502a8594",
+      "color": "brown",
+      "backPicture": "",
+      "picture": "/images/cityCards/cities-8.png",
+      "points": 3
+    },
+    {
+      "_id": "6105ad94bbb7d819502a8597",
+      "color": "green",
+      "backPicture": "",
+      "picture": "/images/cityCards/cities-10.png",
+      "points": 2
+    },
+    {
+      "_id": "6105ad22bbb7d819502a8595",
+      "color": "brown",
+      "backPicture": "",
+      "picture": "/images/cityCards/cities-9.png",
+      "points": 4
+    },
+    {
+      "_id": "6105ae1ebbb7d819502a8599",
+      "color": "green",
+      "backPicture": "",
+      "picture": "/images/cityCards/cities-12.png",
+      "points": 4
+    },
+    {
+      "_id": "6105acbbbbb7d819502a8590",
+      "color": "purple",
+      "backPicture": "",
+      "picture": "/images/cityCards/cities-13.png",
+      "points": 2
+    },
+    {
+      "_id": "6105ae4abbb7d819502a859b",
+      "color": "blue",
+      "backPicture": "",
+      "picture": "/images/cityCards/cities-5.png",
+      "points": 3
+    },
+    {
+      "_id": "6105ac96bbb7d819502a858f",
+      "color": "yellow",
+      "backPicture": "",
+      "picture": "/images/cityCards/cities-3.png",
+      "points": 4
+    },
+    {
+      "_id": "6105ad03bbb7d819502a8593",
+      "color": "brown",
+      "backPicture": "",
+      "picture": "/images/cityCards/cities-7.png",
+      "points": 2
+    },
+    {
+      "_id": "60f587d57a2b0c47b799d18d",
+      "color": "yellow",
+      "backPicture": "",
+      "picture": "/images/cityCards/cities-1.png",
+      "points": 2
+    },
+    {
+      "_id": "6105acf7bbb7d819502a8591",
+      "color": "purple",
+      "backPicture": "",
+      "picture": "/images/cityCards/cities-14.png",
+      "points": 3
+    },
+    {
+      "_id": "6105ae17bbb7d819502a8598",
+      "color": "green",
+      "backPicture": "",
+      "picture": "/images/cityCards/cities-11.png",
+      "points": 3
+    }
+  ],
+  "penaltyCards": [
+    {
+      "_id": "60f58c3c7a2b0c47b799d18e",
+      "points": 1,
+      "picture": "/images/penaltyCards/penalty-1.png",
+      "color": "penalty"
+    },
+    {
+      "_id": "6105b780bbb7d819502a85c7",
+      "points": 4,
+      "picture": "/images/penaltyCards/penalty-4.png",
+      "backPicture": "",
+      "color": "penalty"
+    },
+    {
+      "_id": "61894927d562b2aa7e9ae390",
+      "points": 1,
+      "picture": "/images/penaltyCards/penalty-1.png",
+      "color": "penalty"
+    },
+    {
+      "_id": "6105b769bbb7d819502a85c5",
+      "points": 2,
+      "picture": "/images/penaltyCards/penalty-2.png",
+      "backPicture": "",
+      "color": "penalty"
+    },
+    {
+      "_id": "61894940d562b2aa7e9ae393",
+      "points": 2,
+      "picture": "/images/penaltyCards/penalty-2.png",
+      "backPicture": "",
+      "color": "penalty"
+    },
+    {
+      "_id": "6105b776bbb7d819502a85c6",
+      "points": 3,
+      "picture": "/images/penaltyCards/penalty-3.png",
+      "backPicture": "",
+      "color": "penalty"
+    },
+    {
+      "_id": "61894944d562b2aa7e9ae394",
+      "points": 2,
+      "picture": "/images/penaltyCards/penalty-2.png",
+      "backPicture": "",
+      "color": "penalty"
+    },
+    {
+      "_id": "61894939d562b2aa7e9ae392",
+      "points": 3,
+      "picture": "/images/penaltyCards/penalty-3.png",
+      "backPicture": "",
+      "color": "penalty"
+    },
+    {
+      "_id": "61894930d562b2aa7e9ae391",
+      "points": 1,
+      "picture": "/images/penaltyCards/penalty-1.png",
+      "color": "penalty"
+    },
+    {
+      "_id": "61894902d562b2aa7e9ae38f",
+      "points": 1,
+      "picture": "/images/penaltyCards/penalty-1.png",
+      "backPicture": "",
+      "color": "penalty"
+    }
+  ],
+  "dices": [
+    {
+      "sides": [
+        {
+          "number": 1,
+          "color": "G"
+        },
+        {
+          "number": 2,
+          "color": "R"
+        },
+        {
+          "number": 3,
+          "color": "B"
+        },
+        {
+          "number": 4,
+          "color": "B"
+        },
+        {
+          "number": 5,
+          "color": "R"
+        },
+        {
+          "number": 6,
+          "color": "G"
+        }
+      ]
+    },
+    {
+      "sides": [
+        {
+          "number": 1,
+          "color": "G"
+        },
+        {
+          "number": 2,
+          "color": "R"
+        },
+        {
+          "number": 3,
+          "color": "B"
+        },
+        {
+          "number": 4,
+          "color": "B"
+        },
+        {
+          "number": 5,
+          "color": "R"
+        },
+        {
+          "number": 6,
+          "color": "G"
+        }
+      ]
+    },
+    {
+      "sides": [
+        {
+          "number": 1,
+          "color": "B"
+        },
+        {
+          "number": 2,
+          "color": "G"
+        },
+        {
+          "number": 3,
+          "color": "R"
+        },
+        {
+          "number": 4,
+          "color": "R"
+        },
+        {
+          "number": 5,
+          "color": "G"
+        },
+        {
+          "number": 6,
+          "color": "B"
+        }
+      ]
+    },
+    {
+      "sides": [
+        {
+          "number": 1,
+          "color": "B"
+        },
+        {
+          "number": 2,
+          "color": "G"
+        },
+        {
+          "number": 3,
+          "color": "R"
+        },
+        {
+          "number": 4,
+          "color": "R"
+        },
+        {
+          "number": 5,
+          "color": "G"
+        },
+        {
+          "number": 6,
+          "color": "B"
+        }
+      ]
+    },
+    {
+      "sides": [
+        {
+          "number": 1,
+          "color": "R"
+        },
+        {
+          "number": 2,
+          "color": "B"
+        },
+        {
+          "number": 3,
+          "color": "G"
+        },
+        {
+          "number": 4,
+          "color": "G"
+        },
+        {
+          "number": 5,
+          "color": "B"
+        },
+        {
+          "number": 6,
+          "color": "R"
+        }
+      ]
+    },
+    {
+      "sides": [
+        {
+          "number": 1,
+          "color": "R"
+        },
+        {
+          "number": 2,
+          "color": "B"
+        },
+        {
+          "number": 3,
+          "color": "G"
+        },
+        {
+          "number": 4,
+          "color": "G"
+        },
+        {
+          "number": 5,
+          "color": "B"
+        },
+        {
+          "number": 6,
+          "color": "R"
+        }
+      ]
+    }
+  ]
+}

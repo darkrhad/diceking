@@ -1,0 +1,60 @@
+{
+  "name": "create-react-app-with-typescript",
+  "version": "4.0.0",
+  "private": true,
+  "dependencies": {
+    "@emotion/react": "^11.7.1",
+    "@emotion/styled": "^11.6.0",
+    "@fontsource/roboto": "^5.3.0",
+    "@material-ui/core": "4.12.2",
+    "@material-ui/icons": "^4.11.2",
+    "@mui/material": "^5.2.4",
+    "@react-spring/web": "^9.3.1",
+    "@types/react": "17.0.9",
+    "@types/react-dom": "17.0.9",
+    "delay": "^5.0.0",
+    "firebase": "^12.3.0",
+    "prettier": "^2.5.0",
+    "react": "^17.0.0",
+    "react-dom": "17.0.2",
+    "react-howler": "^5.2.0",
+    "react-router-dom": "5.3.0",
+    "react-scripts": "^5.0.1",
+    "typescript": "4.3.5"
+  },
+  "engines": {
+    "node": ">=18.x"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "prettier-format": "prettier --config .prettierrc 'src/**/*.ts*' --write",
+    "e2e": "playwright test",
+    "e2e:turn": "FORCE_TURN=true playwright test",
+    "e2e:headed": "playwright test --headed",
+    "emulator": "firebase emulators:start --only firestore --project demo-dice-king",
+    "start:local": "REACT_APP_USE_EMULATOR=true react-scripts start"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@playwright/test": "~1.61.0",
+    "@types/jest": "^27.5.2",
+    "firebase-tools": "^13.35.1"
+  },
+  "overrides": {
+    "universal-analytics": "0.5.3"
+  }
+}

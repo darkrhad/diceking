@@ -1,0 +1,424 @@
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
+import { PlayerInfo, PlayerInfoContext } from 'hooks/usePlayerInfo';
+import { gameDispatchRef } from 'pages/PlayGame';
+
+import { DataChannelSocket } from './../firestore/DataChannelSocket';
+import { setupGuestPeerWithFirestore } from './../firestore/setupGuestPeerWithFirestore';
+import { setupHostPeersWithFirestore } from './../firestore/setupHostPeersWithFirestore';
+
+import takeCard from 'actions/takeCard';
+import endTurn from 'actions/endTurn';
+import rollDice from 'actions/rollDice';
+import { markRoomInactiveOnUnload } from 'firestore/deleteRoom';
+import lockDice from 'actions/diceLock';
+import updateDragon from 'actions/updateDragon';
+
+export interface NetworkContextType {
+  send: (action: any) => void;
+  leaveRoom: () => Promise<void>;
+  messages: any[];
+}
+
+export const NetworkContext = createContext<NetworkContextType>({
+  send: () => {},
+  leaveRoom: async () => {},
+  messages: [],
+});
+
+interface NetworkProviderProps {
+  children: React.ReactNode;
+}
+
+export const NetworkProvider: React.FC<NetworkProviderProps> = ({
+  children,
+}) => {
+  const {
+    roomId,
+    playerId,
+    gameStarted,
+    players,
+    setPlayers,
+    setNumberPlayers,
+    setGameStarted,
+    setGameStartedState,
+    isHost,
+    sethostLeft,
+  } = useContext(PlayerInfoContext);
+
+  // Messages from peers
+  const [messages, setMessages] = useState<any[]>([]);
+
+  // Guests' connections to host (only for host)
+  const guestConnectionsRef = useRef<Map<string, DataChannelSocket>>(new Map());
+
+  // Guest's single connection to host (only for guest)
+  const guestSocketRef = useRef<DataChannelSocket | null>(null);
+
+  // Message queue for sending when connection is not ready
+  const sendQueueRef = useRef<any[]>([]);
+
+  // Closes the current room connection (host: also deletes the room)
+  const teardownRef = useRef<(() => void | Promise<void>) | null>(null);
+
+  // Set once the guest handled "host left" (or left on its own), so the
+  // HOST_LEAVE message, the room doc watch and the channel closing don't
+  // each show the popup.
+  const hostLeftHandledRef = useRef(false);
+
+  const notifyHostLeft = () => {
+    if (hostLeftHandledRef.current) return;
+    hostLeftHandledRef.current = true;
+    sethostLeft(true);
+  };
+
+  // Host: drops a guest from the player list and tells the remaining guests.
+  // peerId is the connection's id, never something taken from a message.
+  const removePlayer = (peerId: string) => {
+    setPlayers((prevPlayers) => {
+      const newPlayers = prevPlayers.filter((p) => p.playerId !== peerId);
+      if (newPlayers.length === prevPlayers.length) {
+        return prevPlayers;
+      }
+
+      setNumberPlayers(newPlayers.length);
+
+      // Broadcast the updated list to remaining guests
+      send({
+        type: 'PLAYER_LEAVE',
+        payload: { players: newPlayers, playerId: peerId },
+      });
+
+      return newPlayers;
+    });
+  };
+
+  // Handle incoming message (for both host and guest)
+  const handleMessage = (msg: { data: string }, senderId?: string) => {
+    const data = JSON.parse(msg.data);
+    console.log('[NETWORK] Received message:', data, 'from', senderId);
+
+    if (isHost) {
+      // ==================================================================
+      // 🤡 Host: If host receives message from guest, run game logic here
+      // ==================================================================
+      switch (data.type) {
+        // 🎲 JOIN_GAME
+        case 'JOIN_GAME':
+          if (data.payload.player) {
+            // The id comes from the connection, so a guest can't join as someone else
+            const player: PlayerInfo = { ...data.payload.player, playerId: senderId };
+            setPlayers((prevPlayers: PlayerInfo[]) => {
+              // Prevent duplicates if same player rejoins
+              const exists = prevPlayers.some(
+                (p) => p.playerId === player.playerId
+              );
+
+              if (exists) {
+                return prevPlayers; // ✅ TypeScript knows this is PlayerInfo[]
+              }
+
+              // Build the new players list safely
+              const newPlayers: PlayerInfo[] = [...prevPlayers, player];
+
+              setNumberPlayers(newPlayers.length);
+
+              // Broadcast the updated list to all guests
+              send({
+                type: 'PLAYER_JOIN',
+                payload: {
+                  players: newPlayers,
+                  playerId: player.playerId,
+                },
+              });
+
+              return newPlayers;
+            });
+          }
+          break;
+        
+        // 🎲 GAME_START
+        case 'GAME_START': // host starts game
+          setGameStarted(true);
+          break;
+
+        // 🎲 ROLL_DICE
+        case 'ROLL_DICE':
+          if (gameDispatchRef.current) {
+            gameDispatchRef.current(rollDice(true, isHost));
+          }
+          break;
+        
+        case 'LOCK_DICE':
+           if (gameDispatchRef.current) {
+            gameDispatchRef.current(lockDice(true, isHost, data.payload.isLocked, data.payload.index));
+          }
+        break;
+
+        case 'UPDATE_DRAGON':
+             if (gameDispatchRef.current) {
+            gameDispatchRef.current(updateDragon(true, isHost, data.payload?.slotIndex, data.payload?.dragonIndex));
+          } 
+        break;
+
+        case 'PLAYER_LEAVE': // player left
+          removePlayer(senderId);
+          break;
+
+        // 🎲 TAKE_CARD
+        case 'TAKE_CARD':
+          if (gameDispatchRef.current) {
+            gameDispatchRef.current(takeCard(data.payload.index, true, isHost));
+          }
+          break;
+
+        // 🎲 END_TURN
+        case 'END_TURN':
+          if (gameDispatchRef.current) {
+            gameDispatchRef.current(endTurn(data.payload.index, true, isHost));
+          }
+          break;
+      }
+    } else {
+      // ==================================================================
+      // 🤡 Guest: receive messages from host (game state updates etc.)
+      // ==================================================================
+      switch (data.type) {
+        // 🎲 PLAYER_JOIN
+        case 'PLAYER_JOIN': // new player joined
+          if (data.payload.players) {
+            setPlayers(data.payload.players);
+            setNumberPlayers(data.payload.players.length);
+          }
+          break;
+
+        // 🎲 PLAYER_LEAVE
+        case 'PLAYER_LEAVE': // player left
+          if (data.payload.players) {
+            setPlayers(data.payload.players);
+            setNumberPlayers(data.payload.players.length);
+          }
+          break;
+
+        // 🎲 GAME_START
+        case 'GAME_START': // host starts game
+          setGameStartedState(data.payload);
+          setGameStarted(true);
+          break;
+        
+        case 'HOST_LEAVE': //host leaves game
+          notifyHostLeft();
+        break;
+
+        // 🎲 ALL OTHER IN_GAME ACTIONS
+        default:
+          if (gameDispatchRef.current) {
+            // add meta.remote so the reducer knows this came from the network
+            gameDispatchRef.current({ ...data, meta: { remote: true } });
+          } else {
+            console.warn(
+              '[NETWORK] Received in-game message but game not initialized:',
+              msg
+            );
+          }
+          break;
+      }
+    }
+
+    // Update local messages state for UI/debugging if needed
+    setMessages((msgs) => [...msgs, { data, senderId }]);
+  };
+
+
+  useEffect(() => {
+    if (!roomId || !playerId) return;
+
+    let cancelled = false;
+    hostLeftHandledRef.current = false;
+
+    if (isHost) {
+
+      // ==================================================================
+      // 🤡 Host: Setup connections for all guests
+      // ==================================================================
+      const host = setupHostPeersWithFirestore(roomId, playerId, (peerId, channel) => {
+
+        // When a new guest connects via Firestore signaling, create DataChannelSocket
+        const socket = new DataChannelSocket(channel);
+
+        // Store guest connection
+        guestConnectionsRef.current.set(peerId, socket);
+
+        socket.onmessage = (msg) => handleMessage(msg, peerId);
+
+        socket.onopen = () => {
+          console.log(`[Network] Connection open with guest ${peerId}`);
+        };
+
+        socket.onerror = (err) => {
+          console.error(
+            `[Network] Connection error with guest ${peerId}:`,
+            err
+          );
+        };
+      }, (peerId) => {
+          console.log(`[Network] Connection closed with guest ${peerId}`);
+          guestConnectionsRef.current.delete(peerId);
+          removePlayer(peerId);
+      });
+
+      host.ready.catch((err) => {
+        if (cancelled) return;
+        console.error('[Network] Failed to create room:', err);
+        alert('⚠️ Failed to create the room. Please try again later.');
+        window.location.href = '/';
+      });
+
+      // When the tab closes there is no time for async cleanup, so tell
+      // guests directly and mark the room inactive with a request that
+      // outlives the page. Docs left behind are removed by the TTL policy.
+      const onPageHide = () => {
+        send({ type: 'HOST_LEAVE', payload: {} });
+        markRoomInactiveOnUnload(roomId);
+      };
+      window.addEventListener('pagehide', onPageHide);
+
+      teardownRef.current = host.teardown;
+
+      return () => {
+        cancelled = true;
+        window.removeEventListener('pagehide', onPageHide);
+        guestConnectionsRef.current.clear();
+        if (teardownRef.current === host.teardown) {
+          teardownRef.current = null;
+        }
+        host.teardown().catch((err) =>
+          console.error('[Network] Failed to clean up room:', err)
+        );
+      };
+    }
+
+    // ==================================================================
+    // 🤡 Guest: Setup a single connection to host
+    // ==================================================================
+    const guest = setupGuestPeerWithFirestore(roomId, playerId, notifyHostLeft);
+
+    guest.ready.then((channel) => {
+      if (cancelled) return;
+
+      const socket = new DataChannelSocket(channel);
+      guestSocketRef.current = socket;
+
+      socket.onmessage = handleMessage;
+
+      socket.onopen = () => {
+        console.log('[Network] Connected to host');
+
+        // Flush queue
+        sendQueueRef.current.forEach((msg) => socket.send(msg));
+        sendQueueRef.current = [];
+      };
+
+      socket.onclose = () => {
+        console.log('[Network] Disconnected from host');
+        guestSocketRef.current = null;
+        notifyHostLeft();
+      };
+
+      socket.onerror = (err) => {
+        console.error('[Network] Socket error:', err);
+      };
+    }).catch((err) => {
+      if (cancelled) return;
+      console.error('[Network] Guest failed to join:', err);
+
+      // 🚨 Simple alert-based error handling
+      if (err.message === 'ROOM_NOT_FOUND') {
+        alert('❌ This room does not exist or was deleted.');
+      } else if (err.message === 'GAME_IN_PROGRESS') {
+        alert('⚠️ The game has already started.');
+      } else if (err.message === 'ROOM_FULL') {
+        alert('⚠️ The room is full');
+      } else {
+        alert('⚠️ Failed to join the game. Please try again later.');
+      }
+      window.location.href = '/';
+    });
+
+    teardownRef.current = guest.teardown;
+
+    // Cleanup on unmount or context changes
+    return () => {
+      cancelled = true;
+      hostLeftHandledRef.current = true;
+      guestSocketRef.current = null;
+      sendQueueRef.current = [];
+      if (teardownRef.current === guest.teardown) {
+        teardownRef.current = null;
+      }
+      guest.teardown();
+    };
+  }, [roomId, playerId, isHost]);
+
+  // Host: tells guests the game is over, then deletes the room.
+  // Guest: closes the connection; the host notices and removes the player.
+  const leaveRoom = async () => {
+    const teardown = teardownRef.current;
+    teardownRef.current = null;
+    hostLeftHandledRef.current = true;
+    if (isHost) {
+      send({ type: 'HOST_LEAVE', payload: {} });
+    }
+    try {
+      await teardown?.();
+    } catch (err) {
+      console.error('[Network] Failed to leave room:', err);
+    }
+  };
+
+  const send = (action: any) => {
+    const message = JSON.stringify({ ...action, senderId: playerId });
+
+    if (isHost) {
+      // Host broadcasts to all guests
+      guestConnectionsRef.current.forEach((socket) => {
+        if (socket.channel.readyState === 'open') {
+        console.log(
+          '🟩 [Network] Host broadcasts to guest: ',
+          message
+        );
+          socket.send(message);
+        }
+      });
+    } else {
+      // Guest sends only to host
+      if (guestSocketRef.current?.readyState === 'open') {
+        console.log(
+          '🟩 [Network] Guest sends to host: ',
+          message
+        );
+        guestSocketRef.current.channel.send(message);
+      } else {
+        console.log(
+          '🟩 [Network] Guest socket not ready, queueing message:',
+          message
+        );
+        sendQueueRef.current.push(message);
+      }
+    }
+  };
+
+
+  return (
+    <NetworkContext.Provider value={{ send, leaveRoom, messages }}>
+      {children}
+    </NetworkContext.Provider>
+  );
+};
+
+export const useNetwork = () => useContext(NetworkContext);
