@@ -71,6 +71,8 @@ interface PlayerCardProps {
   isHighlighted: boolean;
   isGameOver: boolean;
   isHighestScorePlayer: boolean;
+  // Opens the full view of this player's kingdom
+  onDeckClick?: () => void;
   children?: React.ReactNode
 }
 
@@ -114,8 +116,11 @@ const PlayerCard = React.forwardRef<HTMLDivElement, PlayerCardProps>((props: Pla
           display: 'flex',
           marginBottom: '1.5vw',
           boxShadow: '2px 2px 2px rgba(0, 0, 0, 0.7)',
+          cursor: props.onDeckClick ? 'pointer' : undefined,
         }}
         ref = {ref}
+        onClick={props.onDeckClick}
+        title={props.onDeckClick ? `See ${props.player.name}'s kingdom` : undefined}
       >
         <img
           src={

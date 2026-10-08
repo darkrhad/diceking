@@ -15,6 +15,7 @@ import initalGameState from '../state/InitialGameState';
 import { useReducerWithThunk } from 'utils';
 import PlayerCard from 'components/PlayerCard';
 import CardOverViewModal from 'components/CardOverViewModal';
+import DeckViewer from 'components/DeckViewer';
 import DiceButton from 'components/DiceButton';
 import sharedStyle from 'components/sharedSettings';
 import { FlyingCard, useCardDecks } from 'hooks/useAnimateCards';
@@ -58,6 +59,10 @@ const useStyles = makeStyles((theme) => {
     zoneLeft: {
       paddingTop: '5vw',
       background: '#44444400',
+      // The player decks overflow into the centre column; keep them on top
+      // so they can be clicked
+      position: 'relative',
+      zIndex: 1,
     },
     zoneCenter: {
       background: '#44444400',
@@ -332,6 +337,8 @@ export default function PlayGame() {
   const audioRef = useRef<HTMLAudioElement>(new Audio(playlist[initialTrack]));
   const playerInfo = useContext(PlayerInfoContext);
   const [showPopUp, setShowPopUp] = useState(false);
+  // Whose kingdom is open full screen, by index in state.player
+  const [viewedPlayer, setViewedPlayer] = useState<number | null>(null);
   const [state, dispatch] = useReducerWithThunk(
     reducer,
     initalGameState,
@@ -626,6 +633,7 @@ export default function PlayGame() {
                         }
                         isGameOver={state.isGameOver}
                         isHighestScorePlayer={isWinner(player)}
+                        onDeckClick={() => setViewedPlayer(index)}
                         index={index}
                       ></PlayerCard>
                     </Grid>
@@ -1295,6 +1303,9 @@ export default function PlayGame() {
                 </Grid>
               </Grid>
             </Grid>
+            {viewedPlayer !== null && state.player[viewedPlayer] && (
+              <DeckViewer player={state.player[viewedPlayer]} onClose={() => setViewedPlayer(null)} />
+            )}
             <FlyingCard
               params={state.animCardParams}
               decks={decks}
