@@ -2,6 +2,7 @@ import { animationFinished, animationStarted } from 'hooks/useAnimateCards';
 import Card from 'model/Card';
 import { GameState } from 'state/State';
 import endTurn from './endTurn';
+import { cardEffect, citizenEffect } from 'state/cardEffects';
 
 export default function takeCard(index, isMultiplayer: boolean, isHost: boolean) {
   return async (dispatch, getState) => {
@@ -84,6 +85,10 @@ export default function takeCard(index, isMultiplayer: boolean, isHost: boolean)
           type: 'saveKingdom',
           payload: card,
         });
+        const kind = citizenEffect(card);
+        if (kind) {
+          dispatch(cardEffect({ kind, target: state.playerTurn, points: card.points }));
+        }
       }
     };
 
@@ -111,6 +116,7 @@ export default function takeCard(index, isMultiplayer: boolean, isHost: boolean)
         type: 'saveKingdom',
         payload: card[0],
       });
+      dispatch(cardEffect({ kind: 'village', target: state.playerTurn, points: card[0].points, color: card[0].color }));
     }
 
     let slotCopy = currentSlots[slotClicked].card;
@@ -142,6 +148,7 @@ export default function takeCard(index, isMultiplayer: boolean, isHost: boolean)
             type: 'saveKingdom',
             payload: card[0],
           });
+          dispatch(cardEffect({ kind: 'village', target: state.playerTurn, points: card[0].points, color: card[0].color }));
         }
         await addToKingdomDeck(currentSlots[nextIndex].card, nextIndex);
       }

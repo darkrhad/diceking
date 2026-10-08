@@ -1,25 +1,7 @@
 // The dragon's roar and the fire's whoosh, made with Web Audio so no sound
 // files are needed. To use recorded sounds instead, play them from here.
 
-let context: AudioContext | null = null;
-
-function audio(): AudioContext | null {
-  const Context = window.AudioContext || (window as any).webkitAudioContext;
-  if (!Context) return null;
-  if (!context) context = new Context();
-  // Browsers start it suspended until the page has been clicked
-  if (context.state === 'suspended') context.resume().catch(() => {});
-  return context;
-}
-
-function noise(ctx: AudioContext, seconds: number): AudioBufferSourceNode {
-  const buffer = ctx.createBuffer(1, Math.ceil(ctx.sampleRate * seconds), ctx.sampleRate);
-  const data = buffer.getChannelData(0);
-  for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
-  const source = ctx.createBufferSource();
-  source.buffer = buffer;
-  return source;
-}
+import { audio, noise } from './audio';
 
 // Low, rough and growling: two detuned saws that rise and fall, chopped by a
 // fast wobble, with breath noise on top

@@ -47,6 +47,22 @@ const reducer = (state: GameState, action: any): GameState => {
         },
       };
 
+    case 'cardEffect': {
+      const { kind, target } = action.payload;
+      const combo =
+        kind === 'fairy'
+          ? state.player[target]?.deck.filter((card) => card.specialEffect === 'Fairy').length
+          : undefined;
+      return {
+        ...state,
+        cardEffect: {
+          ...action.payload,
+          combo,
+          start: (state.cardEffect?.start ?? 0) + 1,
+        },
+      };
+    }
+
     case 'loadGameState':
       return {
         ...state,

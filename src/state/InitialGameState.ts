@@ -20,6 +20,7 @@ const initalGameState: GameState = {
   },
   citizenCardDeck: [],
   dragonFire: { target: 0, points: 0, start: 0 },
+  cardEffect: { kind: 'village', target: 0, points: 0, start: 0 },
   animCardParams: {
     fromDeck: 'citizen',
     toDeck: 'citizen',

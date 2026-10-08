@@ -1,5 +1,6 @@
 import Card from '../model/Card';
 import GameInfo from '../model/GameInfo';
+import { CardEffect } from './cardEffects';
 
 export interface CityCardSlot {
   cards: Card[];
@@ -72,4 +73,5 @@ export interface GameState {
   endTurnEnabled: boolean;
   animCardParams: AnimCardParams;
   dragonFire: DragonFire;
+  cardEffect: CardEffect;
 }

@@ -4,6 +4,7 @@ import { CitizenCardSlot, GameState } from 'state/State';
 import replaceSlots from './replaceSlots';
 import { flushSync } from 'react-dom';
 import Card from 'model/Card';
+import { cardEffect } from 'state/cardEffects';
 
 export default function takePenaltyCard(citizenCardDeck: Card[], citizenCardSlots: CitizenCardSlot[], penaltyCardDeck: Card[], discardDeck: Card[]) {
   return async (dispatch, getState) => {
@@ -68,6 +69,7 @@ export default function takePenaltyCard(citizenCardDeck: Card[], citizenCardSlot
         type: 'saveKingdom',
         payload: penaltyCard
       })
+      dispatch(cardEffect({ kind: 'scoundrel', target: getState().playerTurn, points: penaltyCard.points }));
     }
    
 

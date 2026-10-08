@@ -17,6 +17,7 @@ import PlayerCard from 'components/PlayerCard';
 import CardOverViewModal from 'components/CardOverViewModal';
 import DeckViewer from 'components/DeckViewer';
 import DragonFire from 'components/DragonFire';
+import CardEffects from 'components/CardEffects';
 import DiceButton from 'components/DiceButton';
 import sharedStyle from 'components/sharedSettings';
 import { FlyingCard, useCardDecks } from 'hooks/useAnimateCards';
@@ -1306,6 +1307,9 @@ export default function PlayGame() {
             </Grid>
             {viewedPlayer !== null && state.player[viewedPlayer] && (
               <DeckViewer player={state.player[viewedPlayer]} onClose={() => setViewedPlayer(null)} />
+            )}
+            {state.cardEffect && (
+              <CardEffects effect={state.cardEffect} decks={decks} soundOn={isSoundOn} />
             )}
             {state.dragonFire && (
               <DragonFire fire={state.dragonFire} decks={decks} soundOn={isSoundOn} />
